@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система Заказов v1.1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f4f7f6; --white: #ffffff; --text: #2c3e50; --border: #dcdde1; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; padding: 20px; }
+        .app-container { width: 100%; max-width: 600px; background: var(--white); padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h1 { font-size: 24px; text-align: center; margin-bottom: 30px; color: var(--primary); }
+        h2 { font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+        .step { display: none; }
+        .step.active { display: block; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button { padding: 15px; border: 1px solid var(--border); background: var(--white); border-radius: 8px; cursor: pointer; font-size: 16px; transition: all 0.2s; width: 100%; font-weight: 600; color: var(--primary); }
+        button:hover { border-color: var(--accent); color: var(--accent); }
+        button.primary { background: var(--accent); color: white; border: none; width: 100%; margin-top: 20px; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .item-row { display: grid; grid-template-columns: 2fr 1fr 1fr; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--bg); }
+        .item-name { font-weight: 500; font-size: 14px; }
+        .item-unit { color: #7f8c8d; font-size: 12px; text-align: center; }
+        input[type="number"] { width: 80px; padding: 8px; border: 1px solid var(--border); border-radius: 4px; text-align: center; }
+        .category-header { background: #f8f9fa; padding: 8px 12px; margin-top: 15px; font-weight: bold; font-size: 14px; color: #7f8c8d; border-radius: 4px; }
+        .summary { margin-top: 20px; padding: 15px; background: #fdfdfd; border: 1px dashed var(--border); }
+    </style>
+<link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/restaurant.png">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/restaurant.png"></head>
+<body>
+
+<div class="app-container">
+    <h1>Заявка на склад</h1>
+
+    <div id="step1" class="step active">
+        <h2>Выберите точку:</h2>
+        <div class="btn-grid">
+            <button onclick="selectPoint('Ресторан Галерея')">Ресторан "Галерея"</button>
+            <button onclick="selectPoint('Лобби-бар')">Лобби-бар</button>
+            <button onclick="selectPoint('Pool-бар')">Pool-бар</button>
+            <button onclick="selectPoint('Кафе Чайка')">Кафе "Чайка"</button>
+        </div>
+    </div>
+
+    <div id="step2" class="step">
+        <h2 id="display-point"></h2>
+        <p style="margin-bottom: 15px;">Что заказываем?</p>
+        <div class="btn-grid">
+            <button onclick="renderList('products')">Продукты</button>
+            <button onclick="renderList('household')">Хоз. группа</button>
+        </div>
+        <button onclick="changeStep(1)" style="margin-top: 20px; width: 100%;">← Назад</button>
+    </div>
+
+    <div id="step3" class="step">
+        <h2 id="display-category"></h2>
+        <div id="items-container"></div>
+        <button class="primary" onclick="showSummary()">Проверить заказ</button>
+        <button onclick="changeStep(2)" style="margin-top: 10px; width: 100%;">← Назад</button>
+    </div>
+
+    <div id="step4" class="step">
+        <h2>Проверьте данные:</h2>
+        <div id="summary-content" class="summary"></div>
+        <button id="send-btn" class="primary" onclick="sendOrder()">Отправить в торговый отдел</button>
+        <button onclick="changeStep(3)" style="margin-top: 10px; width: 100%;">Исправить</button>
+    </div>
+</div>
+
+<script>
+    // URL ИЗ GOOGLE SCRIPTS
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwy70e7boi-9r4rHyPQnsii1Vh6zVhYxrOwjKUGdK3Jh-cTbffXUJOlnzmmPs9tJWVx/exec';
+
+    // Твоя база данных со всей сохраненной номенклатурой
+    const database = {
+        'Ресторан Галерея': {
+            'products': [
+                { cat: 'Мясо и птица', name: 'Вырезка говяжья', unit: 'кг' },
+                { cat: 'Молочные продукты', name: 'Сливки 33% Галерея', unit: 'л' }
+            ],
+            'household': [
+                { cat: 'Химия', name: 'Профессиональное средство для посудомойки', unit: 'шт' }
+            ]
+        },
+        'Лобби-бар': {
+            'products': [
+                { cat: 'Кофе, чай, авторский чай', name: 'Кофе зерновой 1 уп. (1кг)', unit: 'шт' },
+                { cat: 'Кофе, чай, авторский чай', name: 'Чай черный листовой Rioba 1уп.(400гр)', unit: 'шт' },
+                { cat: 'Кофе, чай, авторский чай', name: 'Чай черный с бергамотом Rioba 1уп.(400гр)', unit: 'шт' },
+                { cat: 'Кофе, чай, авторский чай', name: 'Чай зеленый Молочный Улун Rioba 1уп.(400гр)', unit: 'шт' },
+                { cat: 'Кофе, чай, авторский чай', name: 'Чай зеленый с жасмином Rioba 1уп.(400гр)', unit: 'шт' },
+                { cat: 'Кофе, чай, авторский чай', name: 'Чай черный с чабрецом Rioba 1уп.(400гр)', unit: 'шт' },
+                { cat: 'Кофе, чай, авторский чай', name: 'Чай зеленый с жасмином Rioba 1уп.(400гр)', unit: 'шт' },
+                { cat: 'Кофе, чай, авторский чай', name: 'Авторский чай Апельсин с облепихой 1кор.(30шт)', unit: 'кор' },
+                { cat: 'Кофе, чай, авторский чай', name: 'Авторский чай Глинтвейн вишневый 1кор.(30шт)', unit: 'кор' },
+                { cat: 'Кофе, чай, авторский чай', name: 'Авторский чай Черная смородина с мелисой 1кор.(30шт)', unit: 'кор' },
+                { cat: 'Кофе, чай, авторский чай', name: 'Авторский чай Северный манго, маракуйа, апельсин 1кор.(30шт)', unit: 'кор' },
+                { cat: 'Сладкое и молочные продукты', name: 'Молоко ультрапаст. 3.2% 1кор.(12шт)', unit: 'кор' },
+                { cat: 'Сладкое и молочные продукты', name: 'Торт Красный бархат 1кор. (12шт)', unit: 'кор' },
+                { cat: 'Сладкое и молочные продукты', name: 'Торт Молочная девочка 1кор. (12шт)', unit: 'кор' },
+                { cat: 'Сладкое и молочные продукты', name: 'Торт Морковный 1кор. (12шт)', unit: 'кор' },
+                { cat: 'Сладкое и молочные продукты', name: 'Торт Черный лес 1кор. (12шт)', unit: 'кор' },
+                { cat: 'Сладкое и молочные продукты', name: 'Торт шоколадно-ореховый 1кор. (12шт)', unit: 'кор' },
+                { cat: 'Сладкое и молочные продукты', name: 'Чезкейк Нью-Йорк 1кор. (12шт)', unit: 'кор' },
+                { cat: 'Сладкое и молочные продукты', name: 'Чезкейк шоколадный 1кор. (12шт)', unit: 'кор' },
+                { cat: 'Сладкое и молочные продукты', name: 'Донаты с темной глазурью замороженные RIOBA 1кор. (12шт)', unit: 'кор' },
+                { cat: 'Сладкое и молочные продукты', name: 'Донаты с глазурью и ванильным кремом RIOBA 1кор. (12шт)', unit: 'кор' },
+                { cat: 'Фрукты и овощи', name: 'Апельсины', unit: 'кг' },
+                { cat: 'Фрукты и овощи', name: 'Яблоко зеленое', unit: 'кг' },
+                { cat: 'Фрукты и овощи', name: 'Грейпфрут', unit: 'кг' },
+                { cat: 'Фрукты и овощи', name: 'Лимоны', unit: 'кг' },
+                { cat: 'Фрукты и овощи', name: 'Морковь мытая', unit: 'кг' },
+                { cat: 'Алкогольные напитки', name: 'Вино Адагум Саперави кр. сух. 0,187мл 1КОР.(12шт)', unit: 'кор' },
+                { cat: 'Алкогольные напитки', name: 'Вино Шато Тамань Мерло, Анчелотта кр. сух. 0,187мл 1КОР.(12шт)', unit: 'кор' },
+                { cat: 'Алкогольные напитки', name: 'Вино Шато Тамань Шардоне бел. сух. 0,187мл 1КОР.(12шт)', unit: 'кор' },
+                { cat: 'Алкогольные напитки', name: 'Вино Шато Тамань Мускат, Пино Гриджио бел. сух. 0,187мл 1КОР.(12шт)', unit: 'кор' },
+                { cat: 'Алкогольные напитки', name: 'Вино игристое Лев Голицин 0,2 1КОР.(12шт)', unit: 'кор' },
+                { cat: 'Алкогольные напитки', name: 'Водка Архангельская 1КОР.(20шт)', unit: 'кор' },
+                { cat: 'Алкогольные напитки', name: 'Водка Зеленая марка кедровая 0,1мл 1КОР.(20шт)', unit: 'кор' },
+                { cat: 'Алкогольные напитки', name: 'Водка Талка 0,1мл 1КОР.(20шт)', unit: 'кор' },
+                { cat: 'Алкогольные напитки', name: 'Виски Мэнкэтчер 0,1мл 1КОР.(12шт)', unit: 'кор' },
+                { cat: 'Алкогольные напитки', name: 'Виски Фоулерс 0,1мл 1КОР.(12шт)', unit: 'кор' },
+                { cat: 'Алкогольные напитки', name: 'Виски Наки Томпсон 0,1мл 1КОР.(12шт)', unit: 'кор' },
+                { cat: 'Алкогольные напитки', name: 'Коньяк Киновский 3 года 0,1мл 1КОР.(12шт)', unit: 'кор' },
+                { cat: 'Алкогольные напитки', name: 'Коньяк Баррель 0,1мл 1КОР.(12шт)', unit: 'кор' },
+                { cat: 'Алкогольные напитки', name: 'Старый Кёнигсберг 4 года 0,1мл 1КОР.(12шт)', unit: 'кор' },
+                { cat: 'Алкогольные напитки', name: 'Ром Кастро 0,1мл 1КОР.(12шт)', unit: 'кор' },
+                { cat: 'Алкогольные напитки', name: 'Пиво ХАРБИН 0,330мл ', unit: 'уп' },
+                { cat: 'Алкогольные напитки', name: 'Пиво КОРОНА 0,330мл', unit: 'уп' },
+                { cat: 'Напитки безалкогольные', name: 'Вода ВОЛЖАНКА газ. стекло 0,5 1уп. (15бут)', unit: 'уп' },
+                { cat: 'Напитки безалкогольные', name: 'Вода ВОЛЖАНКА негаз. стекло 0,5 1уп. (15бут)', unit: 'уп' },
+                { cat: 'Напитки безалкогольные', name: 'Сок ИЛЬ ПРИМО вишня 0,2 1уп. (8шт)', unit: 'уп' },
+                { cat: 'Напитки безалкогольные', name: 'Сок ИЛЬ ПРИМО яблоко 0,2 1уп. (8шт)', unit: 'уп' },
+                { cat: 'Напитки безалкогольные', name: 'Сок ИЛЬ ПРИМО ананас 0,2 1уп. (8шт)', unit: 'уп' },
+                { cat: 'Напитки безалкогольные', name: 'Сок ИЛЬ ПРИМО апельсин 0,2 1уп. (8шт)', unit: 'уп' },
+                { cat: 'Напитки безалкогольные', name: 'Сок ИЛЬ ПРИМО томат 0,2 1уп. (8шт)', unit: 'уп' },
+                { cat: 'Напитки безалкогольные', name: 'Лимонад ЧЕРНОГОЛОВКА стекло 0,5 1уп.(12шт)', unit: 'уп' },
+                { cat: 'Напитки безалкогольные', name: 'Лимонад ЧЕРНОГОЛОВКА байкал стекло 0,5 1уп.(12шт)', unit: 'уп' },
+                { cat: 'Напитки безалкогольные', name: 'Лимонад ЧЕРНОГОЛОВКА тархун стекло 0,5 1уп.(12шт)', unit: 'уп' },
+                { cat: 'Напитки безалкогольные', name: 'Лимонад ЧЕРНОГОЛОВКА дюшес стекло 0,5 1уп.(12шт)', unit: 'уп' },
+                { cat: 'Напитки безалкогольные', name: 'Кола RICH стекло 0,5 1уп.(12шт)', unit: 'уп' },
+                { cat: 'Напитки безалкогольные', name: 'RED BULL 0,250 1уп.(12шт)', unit: 'уп' },
+                { cat: 'Напитки безалкогольные', name: 'BERN 0,449 1уп.(12шт)', unit: 'уп' },
+                { cat: 'Мороженное и топинги', name: 'Мороженное ванильное 1уп. (2,5кг)', unit: 'уп' },
+                { cat: 'Мороженное и топинги', name: 'Топинг клубника 1бут.', unit: 'бут' },
+                { cat: 'Мороженное и топинги', name: 'Топинг шоколад 1бут.', unit: 'бут' },
+                { cat: 'Мороженное и топинги', name: 'Топинг карамель 1бут.', unit: 'бут' }
+            ],
+            'household': [
+                { cat: 'Расходники', name: 'Трубочки крафт', unit: 'уп' }
+            ]
+        },
+        'Pool-бар': {
+            'products': [
+                { cat: 'Напитки', name: 'Свежая мята', unit: 'кг' },
+                { cat: 'Лёд', name: 'Лёд краш', unit: 'кг' }
+            ],
+            'household': [
+                { cat: 'Посуда', name: 'Стаканы пластик 0.5', unit: 'уп' }
+            ]
+        },
+        'Кафе Чайка': {
+            'products': [
+                { cat: 'Выпечка', name: 'Мука высший сорт', unit: 'кг' },
+                { cat: 'Кондитерка', name: 'Сахарная пудра', unit: 'кг' }
+            ],
+            'household': [
+                { cat: 'Упаковка', name: 'Контейнер навынос', unit: 'шт' }
+            ]
+        }
+    };
+
+    // Главный объект текущего заказа
+    let orderData = {
+        point: '',
+        category: '',
+        items: {} 
+    };
+
+    // Функция переключения экранов (универсальная)
+    function changeStep(stepNumber) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById(`step${stepNumber}`).classList.add('active');
+    }
+
+    // Выбор точки (Шаг 1)
+    function selectPoint(pointName) {
+        orderData.point = pointName;
+        document.getElementById('display-point').innerText = 'Точка: ' + pointName;
+        changeStep(2);
+    }
+
+    // Запись количества и единицы измерения
+    function updateQty(itemName, qtyValue, unitType) {
+        const val = parseFloat(qtyValue);
+        if (val > 0) {
+            orderData.items[itemName] = {
+                qty: val,
+                unit: unitType
+            };
+        } else {
+            delete orderData.items[itemName];
+        }
+    }
+
+    // Отрисовка списка товаров (Шаг 3)
+    function renderList(type) {
+        orderData.category = type === 'products' ? 'Продукты' : 'Хоз. группа';
+        document.getElementById('display-category').innerText = orderData.category;
+        
+        const container = document.getElementById('items-container');
+        container.innerHTML = '';
+        
+        const currentPoint = orderData.point; 
+        const activeList = database[currentPoint]?.[type] || [];
+        
+        if (activeList.length === 0) {
+            container.innerHTML = '<div style="padding: 20px; text-align: center; color: #7f8c8d;">Для этой точки список позиций еще не заполнен.</div>';
+            changeStep(3);
+            return;
+        }
+        
+        let currentCat = '';
+        activeList.forEach(item => {
+            if (item.cat !== currentCat) {
+                currentCat = item.cat;
+                const catHeader = document.createElement('div');
+                catHeader.className = 'category-header';
+                catHeader.innerText = currentCat;
+                container.appendChild(catHeader);
+            }
+            
+            // Проверяем, вводилось ли уже количество для этого товара ранее
+            const savedValue = orderData.items[item.name]?.qty || '';
+            
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            row.innerHTML = `
+                <div class="item-name">${item.name}</div>
+                <div class="item-unit">${item.unit}</div>
+                <input type="number" placeholder="0" min="0" value="${savedValue}" onchange="updateQty('${item.name}', this.value, '${item.unit}')">
+            `;
+            container.appendChild(row);
+        });
+        changeStep(3);
+    }
+
+    // Показ экрана итоговой проверки (Шаг 4)
+    function showSummary() {
+        const summary = document.getElementById('summary-content');
+        const items = Object.entries(orderData.items);
+        
+        if (items.length === 0) { 
+            alert('Вы ничего не выбрали!'); 
+            return; 
+        }
+        
+        let html = `<strong>Точка:</strong> ${orderData.point}<br><strong>Тип:</strong> ${orderData.category}<br><br>`;
+        items.forEach(([name, itemObj]) => { 
+            html += `• ${name}: <strong>${itemObj.qty} ${itemObj.unit}</strong><br>`; 
+        });
+        
+        summary.innerHTML = html;
+        changeStep(4);
+    }
+
+    // Отправка данных в Google Apps Script
+    async function sendOrder() {
+        const btn = document.getElementById('send-btn');
+        btn.disabled = true;
+        btn.innerText = 'Отправка...';
+
+        try {
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                body: JSON.stringify(orderData)
+            });
+            alert('Заказ успешно отправлен!');
+            location.reload();
+        } catch (e) {
+            alert('Ошибка при отправке: ' + e);
+            btn.disabled = false;
+            btn.innerText = 'Попробовать еще раз';
+        }
+    }
+</script>
+</body>
+</html>
