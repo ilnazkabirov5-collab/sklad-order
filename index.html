@@ -9,7 +9,7 @@
         :root { --primary: #2c3e50; --accent: #3498db; --bg: #f4f7f6; --white: #ffffff; --text: #2c3e50; --border: #dcdde1; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; padding: 20px; }
         .app-container { width: 100%; max-width: 600px; background: var(--white); padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        h1 { font-size: 24px; text-align: center; margin-bottom: 30px; color: var(--primary); }
+        1 { font-size: 24px; text-align: center; margin-bottom: 30px; color: var(--primary); }
         h2 { font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
         .step { display: none; }
         .step.active { display: block; }
@@ -24,9 +24,11 @@
         input[type="number"] { width: 80px; padding: 8px; border: 1px solid var(--border); border-radius: 4px; text-align: center; }
         .category-header { background: #f8f9fa; padding: 8px 12px; margin-top: 15px; font-weight: bold; font-size: 14px; color: #7f8c8d; border-radius: 4px; }
         .summary { margin-top: 20px; padding: 15px; background: #fdfdfd; border: 1px dashed var(--border); }
+        .btn-full { grid-column: span 2; margin-top: 10px; }
     </style>
-<link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/restaurant.png">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/restaurant.png"></head>
+    <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/restaurant.png">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/restaurant.png">
+</head>
 <body>
 
 <div class="app-container">
@@ -35,10 +37,29 @@
     <div id="step1" class="step active">
         <h2>Выберите точку:</h2>
         <div class="btn-grid">
-            <button onclick="selectPoint('Ресторан Галерея')">Ресторан "Галерея"</button>
+            <button onclick="openRestaurantMenu()">Ресторан "Галерея"</button>
             <button onclick="selectPoint('Лобби-бар')">Лобби-бар</button>
             <button onclick="selectPoint('Pool-бар')">Pool-бар</button>
             <button onclick="selectPoint('Кафе Чайка')">Кафе "Чайка"</button>
+        </div>
+    </div>
+
+    <div id="step-rest-dept" class="step">
+        <h2>Ресторан "Галерея" — Выберите отдел:</h2>
+        <div class="btn-grid">
+            <button onclick="selectRestaurantDept('Бар')">Бар</button>
+            <button onclick="selectRestaurantDept('Кухня')">Кухня</button>
+            <button onclick="changeStep(1)" class="btn-full">← Назад к точкам</button>
+        </div>
+    </div>
+
+    <div id="step-rest-group" class="step">
+        <h2 id="display-rest-dept"></h2>
+        <p style="margin-bottom: 15px;">Что заказываем?</p>
+        <div class="btn-grid">
+            <button onclick="renderList('products')">Продовольствие</button>
+            <button onclick="renderList('household')">Хоз. группа</button>
+            <button onclick="backToRestaurantDept()" class="btn-full">← Назад к отделам</button>
         </div>
     </div>
 
@@ -48,15 +69,15 @@
         <div class="btn-grid">
             <button onclick="renderList('products')">Продукты</button>
             <button onclick="renderList('household')">Хоз. группа</button>
+            <button onclick="changeStep(1)" class="btn-full">← Назад</button>
         </div>
-        <button onclick="changeStep(1)" style="margin-top: 20px; width: 100%;">← Назад</button>
     </div>
 
     <div id="step3" class="step">
         <h2 id="display-category"></h2>
         <div id="items-container"></div>
         <button class="primary" onclick="showSummary()">Проверить заказ</button>
-        <button onclick="changeStep(2)" style="margin-top: 10px; width: 100%;">← Назад</button>
+        <button onclick="handleBackFromItems()" style="margin-top: 10px; width: 100%;">← Назад</button>
     </div>
 
     <div id="step4" class="step">
@@ -68,10 +89,9 @@
 </div>
 
 <script>
-    // URL ИЗ GOOGLE SCRIPTS
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwy70e7boi-9r4rHyPQnsii1Vh6zVhYxrOwjKUGdK3Jh-cTbffXUJOlnzmmPs9tJWVx/exec';
 
-    // Твоя база данных со всей сохраненной номенклатурой
+    // В базе данных мы оставили 'Ресторан Галерея', чтобы не ломать скрипты
     const database = {
         'Ресторан Галерея': {
             'products': [
@@ -170,49 +190,78 @@
         }
     };
 
-    // Главный объект текущего заказа
     let orderData = {
         point: '',
         category: '',
         items: {} 
     };
 
-    // Функция переключения экранов (универсальная)
-    function changeStep(stepNumber) {
+    // Переменная для хранения выбранного отдела Ресторана (Бар или Кухня)
+    let selectedRestaurantDepartment = '';
+
+    function changeStep(stepIdOrNumber) {
         document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-        document.getElementById(`step${stepNumber}`).classList.add('active');
+        
+        // Поддержка старых числовых шагов и новых текстовых ID
+        if (typeof stepIdOrNumber === 'number') {
+            document.getElementById(`step${stepIdOrNumber}`).classList.add('active');
+        } else {
+            document.getElementById(stepIdOrNumber).classList.add('active');
+        }
     }
 
-    // Выбор точки (Шаг 1)
+    // Открытие вложенного меню Ресторана
+    function openRestaurantMenu() {
+        changeStep('step-rest-dept');
+    }
+
+    // Выбор отдела Ресторана (Бар или Кухня)
+    function selectRestaurantDept(deptName) {
+        selectedRestaurantDepartment = deptName;
+        // Записываем финальную точку для отправки
+        orderData.point = `Ресторан Галерея — ${deptName}`; 
+        
+        document.getElementById('display-rest-dept').innerText = `Ресторан "Галерея" — ${deptName}`;
+        changeStep('step-rest-group');
+    }
+
+    function backToRestaurantDept() {
+        changeStep('step-rest-dept');
+    }
+
+    // Выбор точки (Для обычных точек: Лобби, Pool, Чайка)
     function selectPoint(pointName) {
         orderData.point = pointName;
         document.getElementById('display-point').innerText = 'Точка: ' + pointName;
         changeStep(2);
     }
 
-    // Запись количества и единицы измерения
     function updateQty(itemName, qtyValue, unitType) {
         const val = parseFloat(qtyValue);
         if (val > 0) {
-            orderData.items[itemName] = {
-                qty: val,
-                unit: unitType
-            };
+            orderData.items[itemName] = { qty: val, unit: unitType };
         } else {
             delete orderData.items[itemName];
         }
     }
 
-    // Отрисовка списка товаров (Шаг 3)
+    // Умная отрисовка списка товаров (Шаг 3)
     function renderList(type) {
-        orderData.category = type === 'products' ? 'Продукты' : 'Хоз. группа';
+        // Устанавливаем текстовое название категории
+        if (orderData.point.includes('Ресторан Галерея')) {
+            orderData.category = type === 'products' ? 'Продовольствие' : 'Хоз. группа';
+        } else {
+            orderData.category = type === 'products' ? 'Продукты' : 'Хоз. группа';
+        }
+        
         document.getElementById('display-category').innerText = orderData.category;
         
         const container = document.getElementById('items-container');
         container.innerHTML = '';
         
-        const currentPoint = orderData.point; 
-        const activeList = database[currentPoint]?.[type] || [];
+        // Для базы данных используем чистый ключ 'Ресторан Галерея'
+        const dbKey = orderData.point.includes('Ресторан Галерея') ? 'Ресторан Галерея' : orderData.point;
+        const activeList = database[dbKey]?.[type] || [];
         
         if (activeList.length === 0) {
             container.innerHTML = '<div style="padding: 20px; text-align: center; color: #7f8c8d;">Для этой точки список позиций еще не заполнен.</div>';
@@ -230,7 +279,6 @@
                 container.appendChild(catHeader);
             }
             
-            // Проверяем, вводилось ли уже количество для этого товара ранее
             const savedValue = orderData.items[item.name]?.qty || '';
             
             const row = document.createElement('div');
@@ -245,7 +293,15 @@
         changeStep(3);
     }
 
-    // Показ экрана итоговой проверки (Шаг 4)
+    // Корректная логика кнопки "Назад" со страницы списка товаров
+    function handleBackFromItems() {
+        if (orderData.point.includes('Ресторан Галерея')) {
+            changeStep('step-rest-group');
+        } else {
+            changeStep(2);
+        }
+    }
+
     function showSummary() {
         const summary = document.getElementById('summary-content');
         const items = Object.entries(orderData.items);
@@ -264,7 +320,6 @@
         changeStep(4);
     }
 
-    // Отправка данных в Google Apps Script
     async function sendOrder() {
         const btn = document.getElementById('send-btn');
         btn.disabled = true;
