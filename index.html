@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Система Заказов v1.1</title>
+    <title>Система Заказов v1.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #2c3e50; --accent: #3498db; --bg: #f4f7f6; --white: #ffffff; --text: #2c3e50; --border: #dcdde1; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; padding: 20px; }
         .app-container { width: 100%; max-width: 600px; background: var(--white); padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        1 { font-size: 24px; text-align: center; margin-bottom: 30px; color: var(--primary); }
+        h1 { font-size: 24px; text-align: center; margin-bottom: 30px; color: var(--primary); }
         h2 { font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
         .step { display: none; }
         .step.active { display: block; }
@@ -34,6 +34,7 @@
 <div class="app-container">
     <h1>Заявка на склад</h1>
 
+    <!-- ШАГ 1: Выбор точки -->
     <div id="step1" class="step active">
         <h2>Выберите точку:</h2>
         <div class="btn-grid">
@@ -44,6 +45,7 @@
         </div>
     </div>
 
+    <!-- Вложенный шаг: Выбор отдела для Ресторана Галерея -->
     <div id="step-rest-dept" class="step">
         <h2>Ресторан "Галерея" — Выберите отдел:</h2>
         <div class="btn-grid">
@@ -53,6 +55,7 @@
         </div>
     </div>
 
+    <!-- Вложенный шаг: Выбор группы для Бар / Кухня Ресторана -->
     <div id="step-rest-group" class="step">
         <h2 id="display-rest-dept"></h2>
         <p style="margin-bottom: 15px;">Что заказываем?</p>
@@ -63,6 +66,7 @@
         </div>
     </div>
 
+    <!-- ШАГ 2: Стандартный выбор группы для остальных точек -->
     <div id="step2" class="step">
         <h2 id="display-point"></h2>
         <p style="margin-bottom: 15px;">Что заказываем?</p>
@@ -73,6 +77,7 @@
         </div>
     </div>
 
+    <!-- ШАГ 3: Список товаров -->
     <div id="step3" class="step">
         <h2 id="display-category"></h2>
         <div id="items-container"></div>
@@ -80,6 +85,7 @@
         <button onclick="handleBackFromItems()" style="margin-top: 10px; width: 100%;">← Назад</button>
     </div>
 
+    <!-- ШАГ 4: Экран проверки -->
     <div id="step4" class="step">
         <h2>Проверьте данные:</h2>
         <div id="summary-content" class="summary"></div>
@@ -91,15 +97,32 @@
 <script>
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwy70e7boi-9r4rHyPQnsii1Vh6zVhYxrOwjKUGdK3Jh-cTbffXUJOlnzmmPs9tJWVx/exec';
 
-    // В базе данных мы оставили 'Ресторан Галерея', чтобы не ломать скрипты
+    // БАЗА ДАННЫХ: Теперь у Бара и Кухни Галереи абсолютно разные, свои списки!
     const database = {
-        'Ресторан Галерея': {
+        'Ресторан Галерея — Бар': {
             'products': [
-                { cat: 'Мясо и птица', name: 'Вырезка говяжья', unit: 'кг' },
-                { cat: 'Молочные продукты', name: 'Сливки 33% Галерея', unit: 'л' }
+                { cat: 'Кофе и Чай', name: 'Кофе зерновой Галерея (1кг)', unit: 'шт' },
+                { cat: 'Кофе и Чай', name: 'Чай черный листовой', unit: 'шт' },
+                { cat: 'Сиропы', name: 'Сироп Ваниль', unit: 'бут' },
+                { cat: 'Напитки', name: 'Сок в ассортименте 1л', unit: 'шт' }
             ],
             'household': [
-                { cat: 'Химия', name: 'Профессиональное средство для посудомойки', unit: 'шт' }
+                { cat: 'Расходники бар', name: 'Трубочки черные', unit: 'уп' },
+                { cat: 'Расходники бар', name: 'Салфетки барные', unit: 'уп' }
+            ]
+        },
+        'Ресторан Галерея — Кухня': {
+            'products': [
+                { cat: 'Мясо и птица', name: 'Вырезка говяжья', unit: 'кг' },
+                { cat: 'Мясо и птица', name: 'Филе куриное', unit: 'кг' },
+                { cat: 'Молочные продукты', name: 'Сливки 33% Галерея', unit: 'л' },
+                { cat: 'Молочные продукты', name: 'Сливочное масло 82.5%', unit: 'кг' },
+                { cat: 'Бакалея', name: 'Соль поваренная', unit: 'кг' },
+                { cat: 'Бакалея', name: 'Масло растительное 5л', unit: 'шт' }
+            ],
+            'household': [
+                { cat: 'Химия кухня', name: 'Средство для посудомойки', unit: 'шт' },
+                { cat: 'Ветошь и перчатки', name: 'Перчатки нитриловые M', unit: 'уп' }
             ]
         },
         'Лобби-бар': {
@@ -196,13 +219,10 @@
         items: {} 
     };
 
-    // Переменная для хранения выбранного отдела Ресторана (Бар или Кухня)
     let selectedRestaurantDepartment = '';
 
     function changeStep(stepIdOrNumber) {
         document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-        
-        // Поддержка старых числовых шагов и новых текстовых ID
         if (typeof stepIdOrNumber === 'number') {
             document.getElementById(`step${stepIdOrNumber}`).classList.add('active');
         } else {
@@ -210,15 +230,13 @@
         }
     }
 
-    // Открытие вложенного меню Ресторана
     function openRestaurantMenu() {
         changeStep('step-rest-dept');
     }
 
-    // Выбор отдела Ресторана (Бар или Кухня)
     function selectRestaurantDept(deptName) {
         selectedRestaurantDepartment = deptName;
-        // Записываем финальную точку для отправки
+        // Теперь имя точки строго совпадает с ключом в базе данных!
         orderData.point = `Ресторан Галерея — ${deptName}`; 
         
         document.getElementById('display-rest-dept').innerText = `Ресторан "Галерея" — ${deptName}`;
@@ -229,7 +247,6 @@
         changeStep('step-rest-dept');
     }
 
-    // Выбор точки (Для обычных точек: Лобби, Pool, Чайка)
     function selectPoint(pointName) {
         orderData.point = pointName;
         document.getElementById('display-point').innerText = 'Точка: ' + pointName;
@@ -245,9 +262,7 @@
         }
     }
 
-    // Умная отрисовка списка товаров (Шаг 3)
     function renderList(type) {
-        // Устанавливаем текстовое название категории
         if (orderData.point.includes('Ресторан Галерея')) {
             orderData.category = type === 'products' ? 'Продовольствие' : 'Хоз. группа';
         } else {
@@ -259,12 +274,11 @@
         const container = document.getElementById('items-container');
         container.innerHTML = '';
         
-        // Для базы данных используем чистый ключ 'Ресторан Галерея'
-        const dbKey = orderData.point.includes('Ресторан Галерея') ? 'Ресторан Галерея' : orderData.point;
-        const activeList = database[dbKey]?.[type] || [];
+        // Теперь программа ищет точечно: либо 'Ресторан Галерея — Бар', либо 'Ресторан Галерея — Кухня'
+        const activeList = database[orderData.point]?.[type] || [];
         
         if (activeList.length === 0) {
-            container.innerHTML = '<div style="padding: 20px; text-align: center; color: #7f8c8d;">Для этой точки список позиций еще не заполнен.</div>';
+            container.innerHTML = '<div style="padding: 20px; text-align: center; color: #7f8c8d;">Для этого отдела список позиций еще не заполнен.</div>';
             changeStep(3);
             return;
         }
@@ -293,7 +307,6 @@
         changeStep(3);
     }
 
-    // Корректная логика кнопки "Назад" со страницы списка товаров
     function handleBackFromItems() {
         if (orderData.point.includes('Ресторан Галерея')) {
             changeStep('step-rest-group');
