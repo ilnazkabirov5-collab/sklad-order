@@ -18,11 +18,62 @@
         button:hover { border-color: var(--accent); color: var(--accent); }
         button.primary { background: var(--accent); color: white; border: none; width: 100%; margin-top: 20px; }
         button:disabled { background: #ccc; cursor: not-allowed; }
-        .item-row { display: grid; grid-template-columns: 2fr 1fr 1fr; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--bg); }
-        .item-name { font-weight: 500; font-size: 14px; }
-        .item-unit { color: #7f8c8d; font-size: 12px; text-align: center; }
-        input[type="number"] { width: 80px; padding: 8px; border: 1px solid var(--border); border-radius: 4px; text-align: center; }
-        .category-header { background: #f8f9fa; padding: 8px 12px; margin-top: 15px; font-weight: bold; font-size: 14px; color: #7f8c8d; border-radius: 4px; }
+        
+        /* СТИЛИ ДЛЯ РАСКРЫВАЮЩИХСЯ КАТЕГОРИЙ (АККОРДЕОН) */
+        .accordion-btn {
+            background-color: #f8f9fa;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 14px 16px;
+            width: 100%;
+            text-align: left;
+            border: 1px solid var(--border);
+            outline: none;
+            font-size: 14px;
+            font-weight: 700;
+            transition: background-color 0.2s, border-color 0.2s;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .accordion-btn:hover {
+            background-color: #edf2f7;
+            border-color: #b8bfc6;
+        }
+        .accordion-btn.active {
+            background-color: #edf2f7;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .accordion-btn::after {
+            content: '\25BC';
+            font-size: 10px;
+            color: #7f8c8d;
+            transition: transform 0.2s;
+        }
+        .accordion-btn.active::after {
+            transform: rotate(180deg);
+        }
+        .accordion-panel {
+            background-color: var(--white);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.25s ease-out;
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            padding: 0 10px;
+        }
+
+        /* Строки товаров внутри панелей */
+        .item-row { display: grid; grid-template-columns: 2fr 1fr 1fr; align-items: center; padding: 12px 5px; border-bottom: 1px solid var(--bg); }
+        .item-row:last-child { border-bottom: none; }
+        .item-name { font-weight: 500; font-size: 14px; color: #2d3748; }
+        .item-unit { color: #7f8c8d; font-size: 12px; text-align: center; background: #edf2f7; padding: 4px 6px; border-radius: 4px; font-weight: 600; }
+        input[type="number"] { width: 80px; padding: 8px; border: 1px solid var(--border); border-radius: 4px; text-align: center; font-family: 'Inter', sans-serif; font-weight: 600; }
+        
         .summary { margin-top: 20px; padding: 15px; background: #fdfdfd; border: 1px dashed var(--border); }
         .btn-full { grid-column: span 2; margin-top: 10px; }
     </style>
@@ -34,7 +85,6 @@
 <div class="app-container">
     <h1>Заявка на склад</h1>
 
-    <!-- ШАГ 1: Выбор точки -->
     <div id="step1" class="step active">
         <h2>Выберите точку:</h2>
         <div class="btn-grid">
@@ -45,7 +95,6 @@
         </div>
     </div>
 
-    <!-- Вложенный шаг: Выбор отдела для Ресторана Галерея -->
     <div id="step-rest-dept" class="step">
         <h2>Ресторан "Галерея" — Выберите отдел:</h2>
         <div class="btn-grid">
@@ -55,7 +104,6 @@
         </div>
     </div>
 
-    <!-- Вложенный шаг: Выбор группы для Бар / Кухня Ресторана -->
     <div id="step-rest-group" class="step">
         <h2 id="display-rest-dept"></h2>
         <p style="margin-bottom: 15px;">Что заказываем?</p>
@@ -66,7 +114,6 @@
         </div>
     </div>
 
-    <!-- ШАГ 2: Стандартный выбор группы для остальных точек -->
     <div id="step2" class="step">
         <h2 id="display-point"></h2>
         <p style="margin-bottom: 15px;">Что заказываем?</p>
@@ -77,7 +124,6 @@
         </div>
     </div>
 
-    <!-- ШАГ 3: Список товаров -->
     <div id="step3" class="step">
         <h2 id="display-category"></h2>
         <div id="items-container"></div>
@@ -85,7 +131,6 @@
         <button onclick="handleBackFromItems()" style="margin-top: 10px; width: 100%;">← Назад</button>
     </div>
 
-    <!-- ШАГ 4: Экран проверки -->
     <div id="step4" class="step">
         <h2>Проверьте данные:</h2>
         <div id="summary-content" class="summary"></div>
@@ -97,7 +142,7 @@
 <script>
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwy70e7boi-9r4rHyPQnsii1Vh6zVhYxrOwjKUGdK3Jh-cTbffXUJOlnzmmPs9tJWVx/exec';
 
-    // БАЗА ДАННЫХ: Теперь у Бара и Кухни Галереи абсолютно разные, свои списки!
+    // ПОЛНАЯ БАЗА ДАННЫХ
     const database = {
         'Ресторан Галерея — Бар': {
             'products': [
@@ -110,129 +155,105 @@
                 { cat: 'Кофе, чай', name: 'Чай зеленый листовой Rioba 1уп.(400гр)', unit: 'шт' },
                 { cat: 'Кофе, чай', name: 'Чай гречишный 1уп.(400гр)', unit: 'шт' },
                 { cat: 'Кофе, чай', name: 'Чай черный с шиповником Rioba 1уп.(400гр)', unit: 'шт' },
-               { cat: 'Игристые вина (0,75л)', name: 'Абрау Дюрсо Брют (Россия, сух.)', unit: 'бут' },
-{ cat: 'Игристые вина (0,75л)', name: 'Абрау Дюрсо (Россия, п/сух.)', unit: 'бут' },
-{ cat: 'Игристые вина (0,75л)', name: 'Абрау Дюрсо (Россия, п/сладк.)', unit: 'бут' },
-{ cat: 'Игристые вина (0,75л)', name: 'Макабео / Шарелло / Перельяда (Испания, сух.)', unit: 'бут' },
-{ cat: 'Игристые вина (0,75л)', name: 'Мартини Асти (Италия, сладк.)', unit: 'бут' },
-{ cat: 'Игристые вина (0,75л)', name: 'Мартини Просекко (Италия, сух.)', unit: 'бут' },
-               { cat: 'Белые вина (0,75л)', name: 'Шардоне (Россия, сух.)', unit: 'бут' },
-{ cat: 'Белые вина (0,75л)', name: 'Совиньон Блан (Россия, сух.)', unit: 'бут' },
-{ cat: 'Белые вина (0,75л)', name: 'Рислинг Рейнский (Россия, сух.)', unit: 'бут' },
-{ cat: 'Белые вина (0,75л)', name: 'Мускат Янтарный (Россия, п/сладк.)', unit: 'бут' },
-{ cat: 'Белые вина (0,75л)', name: 'Ркацители / Мцване (Грузия, сух.)', unit: 'бут' },
-{ cat: 'Белые вина (0,75л)', name: 'Ркацители (Грузия, сух.)', unit: 'бут' },
-{ cat: 'Белые вина (0,75л)', name: 'Пино Гриджо (Италия, сух.)', unit: 'бут' },
-{ cat: 'Белые вина (0,75л)', name: 'Пфефферер (Италия, п/сух.)', unit: 'бут' },
-{ cat: 'Белые вина (0,75л)', name: 'Лоурейру / Аринту / Тражадура (Португалия, п/сух.)', unit: 'бут' },
-{ cat: 'Белые вина (0,75л)', name: 'Семильон / Совиньон Блан (Франция, сух.)', unit: 'бут' },
+                { cat: 'Игристые вина (0,75л)', name: 'Абрау Дюрсо Брют (Россия, сух.)', unit: 'бут' },
+                { cat: 'Игристые вина (0,75л)', name: 'Абрау Дюрсо (Россия, п/сух.)', unit: 'бут' },
+                { cat: 'Игристые вина (0,75л)', name: 'Абрау Дюрсо (Россия, п/сладк.)', unit: 'бут' },
+                { cat: 'Игристые вина (0,75л)', name: 'Макабео / Шарелло / Перельяда (Испания, сух.)', unit: 'бут' },
+                { cat: 'Игристые вина (0,75л)', name: 'Мартини Асти (Италия, сладк.)', unit: 'бут' },
+                { cat: 'Игристые вина (0,75л)', name: 'Мартини Просекко (Италия, сух.)', unit: 'бут' },
+                { cat: 'Белые вина (0,75л)', name: 'Шардоне (Россия, сух.)', unit: 'бут' },
+                { cat: 'Белые вина (0,75л)', name: 'Совиньон Блан (Россия, сух.)', unit: 'бут' },
+                { cat: 'Белые вина (0,75л)', name: 'Рислинг Рейнский (Россия, сух.)', unit: 'бут' },
+                { cat: 'Белые вина (0,75л)', name: 'Мускат Янтарный (Россия, п/сладк.)', unit: 'бут' },
+                { cat: 'Белые вина (0,75л)', name: 'Ркацители / Мцване (Грузия, сух.)', unit: 'бут' },
+                { cat: 'Белые вина (0,75л)', name: 'Ркацители (Грузия, сух.)', unit: 'бут' },
+                { cat: 'Белые вина (0,75л)', name: 'Пино Гриджо (Италия, сух.)', unit: 'бут' },
+                { cat: 'Белые вина (0,75л)', name: 'Пфефферер (Италия, п/сух.)', unit: 'бут' },
+                { cat: 'Белые вина (0,75л)', name: 'Лоурейру / Аринту / Тражадура (Португалия, п/сух.)', unit: 'бут' },
+                { cat: 'Белые вина (0,75л)', name: 'Семильон / Совиньон Блан (Франция, сух.)', unit: 'бут' },
                 { cat: 'Красные вина (0,75л)', name: 'Мерло (Россия, сух.)', unit: 'бут' },
-{ cat: 'Красные вина (0,75л)', name: 'Каберне Совиньон (Россия, сух.)', unit: 'бут' },
-{ cat: 'Красные вина (0,75л)', name: 'Саперави (Грузия, сух.)', unit: 'бут' },
-{ cat: 'Красные вина (0,75л)', name: 'Саперави (Грузия, п/сладк.)', unit: 'бут' },
-{ cat: 'Красные вина (0,75л)', name: 'Темпранильо (Испания, п/сух.)', unit: 'бут' },
-{ cat: 'Красные вина (0,75л)', name: 'Монтепульчано (Италия, сух.)', unit: 'бут' },
-{ cat: 'Красные вина (0,75л)', name: 'Санджовезе (Италия, сух.)', unit: 'бут' },
-{ cat: 'Красные вина (0,75л)', name: 'Пино Нуар (Франция, сух.)', unit: 'бут' },
-{ cat: 'Красные вина (0,75л)', name: 'Мерло / Каберне Совиньон (Франция, Медок, сух.)', unit: 'бут' },
+                { cat: 'Красные вина (0,75л)', name: 'Каберне Совиньон (Россия, сух.)', unit: 'бут' },
+                { cat: 'Красные вина (0,75л)', name: 'Саперави (Грузия, сух.)', unit: 'бут' },
+                { cat: 'Красные вина (0,75л)', name: 'Саперави (Грузия, п/сладк.)', unit: 'бут' },
+                { cat: 'Красные вина (0,75л)', name: 'Темпранильо (Испания, п/сух.)', unit: 'бут' },
+                { cat: 'Красные вина (0,75л)', name: 'Монтепульчано (Италия, сух.)', unit: 'бут' },
+                { cat: 'Красные вина (0,75л)', name: 'Санджовезе (Италия, сух.)', unit: 'бут' },
+                { cat: 'Красные вина (0,75л)', name: 'Пино Нуар (Франция, сух.)', unit: 'бут' },
+                { cat: 'Красные вина (0,75л)', name: 'Мерло / Каберне Совиньон (Франция, Медок, сух.)', unit: 'бут' },
                 { cat: 'Вина в маленьких бутылках (187мл)', name: 'Бианка / Пино Блан (Россия, бел. сух.)', unit: 'кор (12 шт)' },
-{ cat: 'Вина в маленьких бутылках (187мл)', name: 'Пино Гриджио / Мускат (Россия, бел. сух.)', unit: 'кор (12 шт)' },
-{ cat: 'Вина в маленьких бутылках (187мл)', name: 'Шардоне / Совиньон (Россия, бел. сух.)', unit: 'кор (12 шт)' },
-{ cat: 'Вина в маленьких бутылках (187мл)', name: 'Мерло / Анчелотта (Россия, кр. сух.)', unit: 'кор (12 шт)' },
-{ cat: 'Вина в маленьких бутылках (187мл)', name: 'Каберне Совиньон (Россия, кр. сух.)', unit: 'кор (12 шт)' },
-                // --- ПИВО И СИДР ---
-{ cat: 'Пиво и Сидр', name: 'Исток Чешский Лагер Светлое (0,5л)', unit: 'бут' },
-{ cat: 'Пиво и Сидр', name: 'Берегиня Пшеничный Бланш (0,5л)', unit: 'бут' },
-{ cat: 'Пиво и Сидр', name: 'Опора Молочный Стаут Темное (0,5л)', unit: 'бут' },
-{ cat: 'Пиво и Сидр', name: 'Стелла Артуа б/алк (440мл)', unit: 'бут' },
-{ cat: 'Пиво и Сидр', name: 'Бакалар б/алк (330мл)', unit: 'бут' },
-{ cat: 'Пиво и Сидр', name: 'Сидр Chateau VOLGO Сухой (0,75л)', unit: 'бут' },
-{ cat: 'Пиво и Сидр', name: 'Сидр Chateau VOLGO Полусухой (0,75л)', unit: 'бут' },
-{ cat: 'Пиво и Сидр', name: 'Сидр Chateau VOLGO Полусладкий (0,75л)', unit: 'бут' },
-
-// --- АПЕРИТИВЫ И ДИДЖЕСТИВЫ ---
-{ cat: 'Аперитивы и Диджестивы (0,5л)', name: 'Бехеровка', unit: 'бут' },
-{ cat: 'Аперитивы и Диджестивы (0,5л)', name: 'Егермейстер', unit: 'бут' },
-{ cat: 'Аперитивы и Диджестивы (0,5л)', name: 'Бейлиз Айриш Крим', unit: 'бут' },
-{ cat: 'Аперитивы и Диджестивы (0,5л)', name: 'Лимончелло', unit: 'бут' },
-{ cat: 'Аперитивы и Диджестивы (0,5л)', name: 'Мартини Бианко', unit: 'бут' },
-{ cat: 'Аперитивы и Диджестивы (0,5л)', name: 'Мартини Фиеро', unit: 'бут' },
-{ cat: 'Аперитивы и Диджестивы (0,5л)', name: 'Мартини Россо', unit: 'бут' },
-
-// --- ДЖИН ---
-{ cat: 'Джин (0,5л)', name: 'Beefeater классический (Англия)', unit: 'бут' },
-{ cat: 'Джин (0,5л)', name: "Gordon's классический (Англия)", unit: 'бут' },
-{ cat: 'Джин (0,5л)', name: 'Biology классический (Россия)', unit: 'бут' },
-{ cat: 'Джин (0,5л)', name: 'Gintl сухой/розовый (Россия)', unit: 'бут' },
-
-// --- ТЕКИЛА ---
-{ cat: 'Текила (0,5л)', name: 'Ольмека Серебро', unit: 'бут' },
-{ cat: 'Текила (0,5л)', name: 'Текуала Rio Grande Gold Золотая', unit: 'бут' },
-
-// --- ВИСКИ ---
-{ cat: 'Виски (0,5л)', name: 'Макаллан Дабл Каск 12 лет (Шотл. односолод.)', unit: 'бут' },
-{ cat: 'Виски (0,5л)', name: 'Чивас 12 (Шотл. купаж.)', unit: 'бут' },
-{ cat: 'Виски (0,5л)', name: 'Джони Уокер Блек Лейбл (Шотл. купаж.)', unit: 'бут' },
-{ cat: 'Виски (0,5л)', name: 'Джони Уокер Рэд Лейбл (Шотл. купаж.)', unit: 'бут' },
-{ cat: 'Виски (0,5л)', name: 'Дюарс 3 (Шотл. купаж.)', unit: 'бут' },
-{ cat: 'Виски (0,5л)', name: 'Балантайс 3 (Шотл. купаж.)', unit: 'бут' },
-{ cat: 'Виски (0,5л)', name: 'Джемесон (Ирландский)', unit: 'бут' },
-{ cat: 'Виски (0,5л)', name: 'Бушмилс Ориджинал (Ирландский)', unit: 'бут' },
-{ cat: 'Виски (0,5л)', name: 'Гленгэрри 3 года (Ирландский)', unit: 'бут' },
-{ cat: 'Виски (0,5л)', name: 'Фую 3 года (Японский)', unit: 'бут' },
-{ cat: 'Виски (0,5л)', name: 'Джек Дэниэлс (Американский)', unit: 'бут' },
-
-// --- РОМ ---
-{ cat: 'Ром (0,5л)', name: 'Оакхарт Ориджинал', unit: 'бут' },
-{ cat: 'Ром (0,5л)', name: 'Гавана Клуб', unit: 'бут' },
-{ cat: 'Ром (0,5л)', name: 'Капитан Морган Спешл', unit: 'бут' },
-{ cat: 'Ром (0,5л)', name: 'Кашаса 51', unit: 'бут' },
-
-// --- ВОДКА И ДИСТИЛЛЯТЫ ---
-{ cat: 'Водка и Дистилляты (0,5л)', name: 'Байкал', unit: 'бут' },
-{ cat: 'Водка и Дистилляты (0,5л)', name: 'Нерпа Глубина и Лед', unit: 'бут' },
-{ cat: 'Водка и Дистилляты (0,5л)', name: 'Белуга Серебро', unit: 'бут' },
-{ cat: 'Водка и Дистилляты (0,5л)', name: 'Чача Абхазия', unit: 'бут' },
-{ cat: 'Водка и Дистилляты (0,5л)', name: 'Самогон', unit: 'бут' },
-
-// --- КОНЬЯК И БРЕНДИ ---
-{ cat: 'Коньяк и Бренди (0,5л)', name: 'Хеннесси VS', unit: 'бут' },
-{ cat: 'Коньяк и Бренди (0,5л)', name: 'Хеннесси VSOP', unit: 'бут' },
-{ cat: 'Коньяк и Бренди (0,5л)', name: 'Камю', unit: 'бут' },
-{ cat: 'Коньяк и Бренди (0,5л)', name: 'Ной 5', unit: 'бут' },
-{ cat: 'Коньяк и Бренди (0,5л)', name: 'Арарат 3', unit: 'бут' },
-{ cat: 'Коньяк и Бренди (0,5л)', name: 'Старый Кенигсберг 4', unit: 'бут' },
-                // --- ЛИМОНАДЫ И ГАЗИРОВАННАЯ ВОДА ---
-{ cat: 'Лимонады и Газировка', name: 'Rich Кола (0,33л)', unit: 'уп (12 шт)' },
-{ cat: 'Лимонады и Газировка', name: 'Rich Тоник Индиан (0,33л)', unit: 'уп (12 шт)' },
-{ cat: 'Лимонады и Газировка', name: 'Черноголовка Байкал (0,5л)', unit: 'уп (12 шт)' },
-{ cat: 'Лимонады и Газировка', name: 'Черноголовка Дюшес (0,5л)', unit: 'уп (12 шт)' },
-{ cat: 'Лимонады и Газировка', name: 'Черноголовка Лимонад (0,5л)', unit: 'уп (12 шт)' },
-{ cat: 'Лимонады и Газировка', name: 'Черноголовка Тархун (0,5л)', unit: 'уп (12 шт)' },
-
-// --- СОКИ И НЕКТАРЫ (1,0л) ---
-{ cat: 'Соки Rich (1,0л)', name: 'сок Rich Ананас (1,0л)', unit: 'кор (12 шт)' },
-{ cat: 'Соки Rich (1,0л)', name: 'сок Rich Апельсин (1,0л)', unit: 'кор (12 шт)' },
-{ cat: 'Соки Rich (1,0л)', name: 'сок Rich Вишня (1,0л)', unit: 'кор (12 шт)' },
-{ cat: 'Соки Rich (1,0л)', name: 'сок Rich Персик (1,0л)', unit: 'кор (12 шт)' },
-{ cat: 'Соки Rich (1,0л)', name: 'сок Rich Томат (1,0л)', unit: 'кор (12 шт)' },
-{ cat: 'Соки Rich (1,0л)', name: 'сок Rich Яблоко (1,0л)', unit: 'кор (12 шт)' },
-
-// --- СОКИ ПОРЦИОННЫЕ (0,2л) ---
-{ cat: 'Соки Il Primo (0,2л)', name: 'сок Il Primo Ананас (0,2л)', unit: 'уп (8 шт)' },
-{ cat: 'Соки Il Primo (0,2л)', name: 'сок Il Primo Апельсин (0,2л)', unit: 'уп (8 шт)' },
-{ cat: 'Соки Il Primo (0,2л)', name: 'сок Il Primo Вишня (0,2л)', unit: 'уп (8 шт)' },
-{ cat: 'Соки Il Primo (0,2л)', name: 'сок Il Primo Персик (0,2л)', unit: 'уп (8 шт)' },
-{ cat: 'Соки Il Primo (0,2л)', name: 'сок Il Primo Томат (0,2л)', unit: 'уп (8 шт)' },
-{ cat: 'Соки Il Primo (0,2л)', name: 'сок Il Primo Яблоко (0,2л)', unit: 'уп (8 шт)' },
-
-// --- ЭНЕРГЕТИЧЕСКИЕ НАПИТКИ ---
-{ cat: 'Энергетики', name: 'Burn (0,449л)', unit: 'бут' },
-{ cat: 'Энергетики', name: 'Red Bull (0,25л)', unit: 'бут' },
-
-// --- ВОДА МИНЕРАЛЬНАЯ ---
-{ cat: 'Вода (стекло)', name: 'Волжанка б/г стекло (0,5л)', unit: 'уп (12 шт)' },
-{ cat: 'Вода (стекло)', name: 'Волжанка газ стекло (0,5л)', unit: 'уп (12 шт)' },
+                { cat: 'Вина в маленьких бутылках (187мл)', name: 'Пино Гриджио / Мускат (Россия, бел. сух.)', unit: 'кор (12 шт)' },
+                { cat: 'Вина в маленьких бутылках (187мл)', name: 'Шардоне / Совиньон (Россия, бел. сух.)', unit: 'кор (12 шт)' },
+                { cat: 'Вина в маленьких бутылках (187мл)', name: 'Мерло / Анчелотта (Россия, кр. сух.)', unit: 'кор (12 шт)' },
+                { cat: 'Вина в маленьких бутылках (187мл)', name: 'Каберне Совиньон (Россия, кр. сух.)', unit: 'кор (12 шт)' },
+                { cat: 'Пиво и Сидр', name: 'Исток Чешский Лагер Светлое (0,5л)', unit: 'бут' },
+                { cat: 'Пиво и Сидр', name: 'Берегиня Пшеничный Бланш (0,5л)', unit: 'бут' },
+                { cat: 'Пиво и Сидр', name: 'Опора Молочный Стаут Темное (0,5л)', unit: 'бут' },
+                { cat: 'Пиво и Сидр', name: 'Стелла Артуа б/алк (440мл)', unit: 'бут' },
+                { cat: 'Пиво и Сидр', name: 'Бакалар б/алк (330мл)', unit: 'бут' },
+                { cat: 'Пиво и Сидр', name: 'Сидр Chateau VOLGO Сухой (0,75л)', unit: 'бут' },
+                { cat: 'Пиво и Сидр', name: 'Сидр Chateau VOLGO Полусухой (0,75л)', unit: 'бут' },
+                { cat: 'Пиво и Сидр', name: 'Сидр Chateau VOLGO Полусладкий (0,75л)', unit: 'бут' },
+                { cat: 'Аперитивы и Диджестивы (0,5л)', name: 'Бехеровка', unit: 'бут' },
+                { cat: 'Аперитивы и Диджестивы (0,5л)', name: 'Егермейстер', unit: 'бут' },
+                { cat: 'Аперитивы и Диджестивы (0,5л)', name: 'Бейлиз Айриш Крим', unit: 'бут' },
+                { cat: 'Аперитивы и Диджестивы (0,5л)', name: 'Лимончелло', unit: 'бут' },
+                { cat: 'Аперитивы и Диджестивы (0,5л)', name: 'Мартини Бианко', unit: 'бут' },
+                { cat: 'Аперитивы и Диджестивы (0,5л)', name: 'Мартини Фиеро', unit: 'бут' },
+                { cat: 'Аперитивы и Диджестивы (0,5л)', name: 'Мартини Россо', unit: 'бут' },
+                { cat: 'Джин (0,5л)', name: 'Beefeater классический (Англия)', unit: 'бут' },
+                { cat: 'Джин (0,5л)', name: "Gordon's классический (Англия)", unit: 'бут' },
+                { cat: 'Джин (0,5л)', name: 'Biology классический (Россия)', unit: 'бут' },
+                { cat: 'Джин (0,5л)', name: 'Gintl сухой/розовый (Россия)', unit: 'бут' },
+                { cat: 'Текила (0,5л)', name: 'Ольмека Серебро', unit: 'бут' },
+                { cat: 'Текила (0,5л)', name: 'Текуала Rio Grande Gold Золотая', unit: 'бут' },
+                { cat: 'Виски (0,5л)', name: 'Макаллан Дабл Каск 12 лет (Шотл. односолод.)', unit: 'бут' },
+                { cat: 'Виски (0,5л)', name: 'Чивас 12 (Шотл. купаж.)', unit: 'бут' },
+                { cat: 'Виски (0,5л)', name: 'Джони Уокер Блек Лейбл (Шотл. купаж.)', unit: 'бут' },
+                { cat: 'Виски (0,5л)', name: 'Джони Уокер Рэд Лейбл (Шотл. купаж.)', unit: 'бут' },
+                { cat: 'Виски (0,5л)', name: 'Дюарс 3 (Шотл. купаж.)', unit: 'бут' },
+                { cat: 'Виски (0,5л)', name: 'Балантайс 3 (Шотл. купаж.)', unit: 'бут' },
+                { cat: 'Виски (0,5л)', name: 'Джемесон (Ирландский)', unit: 'бут' },
+                { cat: 'Виски (0,5л)', name: 'Бушмилс Ориджинал (Ирландский)', unit: 'бут' },
+                { cat: 'Виски (0,5л)', name: 'Гленгэрри 3 года (Ирландский)', unit: 'бут' },
+                { cat: 'Виски (0,5л)', name: 'Фую 3 года (Японский)', unit: 'бут' },
+                { cat: 'Виски (0,5л)', name: 'Джек Дэниэлс (Американский)', unit: 'бут' },
+                { cat: 'Ром (0,5л)', name: 'Оакхарт Ориджинал', unit: 'бут' },
+                { cat: 'Ром (0,5л)', name: 'Гавана Клуб', unit: 'бут' },
+                { cat: 'Ром (0,5л)', name: 'Капитан Морган Спешл', unit: 'бут' },
+                { cat: 'Ром (0,5л)', name: 'Кашаса 51', unit: 'бут' },
+                { cat: 'Водка и Дистилляты (0,5л)', name: 'Байкал', unit: 'бут' },
+                { cat: 'Водка и Дистилляты (0,5л)', name: 'Нерпа Глубина и Лед', unit: 'бут' },
+                { cat: 'Водка и Дистилляты (0,5л)', name: 'Белуга Серебро', unit: 'бут' },
+                { cat: 'Водка и Дистилляты (0,5л)', name: 'Чача Абхазия', unit: 'бут' },
+                { cat: 'Водка и Дистилляты (0,5л)', name: 'Самогон', unit: 'бут' },
+                { cat: 'Коньяк и Бренди (0,5л)', name: 'Хеннесси VS', unit: 'бут' },
+                { cat: 'Коньяк и Бренди (0,5л)', name: 'Хеннесси VSOP', unit: 'бут' },
+                { cat: 'Коньяк и Бренди (0,5л)', name: 'Камю', unit: 'бут' },
+                { cat: 'Коньяк и Бренди (0,5л)', name: 'Ной 5', unit: 'бут' },
+                { cat: 'Коньяк и Бrenди (0,5л)', name: 'Арарат 3', unit: 'бут' },
+                { cat: 'Коньяк и Бренди (0,5л)', name: 'Старый Кенигсберг 4', unit: 'бут' },
+                { cat: 'Лимонады и Газировка', name: 'Rich Кола (0,33л)', unit: 'уп (12 шт)' },
+                { cat: 'Лимонады и Газировка', name: 'Rich Тоник Индиан (0,33л)', unit: 'уп (12 шт)' },
+                { cat: 'Лимонады и Газировка', name: 'Черноголовка Байкал (0,5л)', unit: 'уп (12 шт)' },
+                { cat: 'Лимонады и Газировка', name: 'Черноголовка Дюшес (0,5л)', unit: 'уп (12 шт)' },
+                { cat: 'Лимонады и Газировка', name: 'Черноголовка Лимонад (0,5л)', unit: 'уп (12 шт)' },
+                { cat: 'Лимонады и Газировка', name: 'Черноголовка Тархун (0,5л)', unit: 'уп (12 шт)' },
+                { cat: 'Соки Rich (1,0л)', name: 'сок Rich Ананас (1,0л)', unit: 'кор (12 шт)' },
+                { cat: 'Соки Rich (1,0л)', name: 'сок Rich Апельсин (1,0л)', unit: 'кор (12 шт)' },
+                { cat: 'Соки Rich (1,0л)', name: 'сок Rich Вишня (1,0л)', unit: 'кор (12 шт)' },
+                { cat: 'Соки Rich (1,0л)', name: 'сок Rich Персик (1,0л)', unit: 'кор (12 шт)' },
+                { cat: 'Соки Rich (1,0л)', name: 'сок Rich Томат (1,0л)', unit: 'кор (12 шт)' },
+                { cat: 'Соки Rich (1,0л)', name: 'сок Rich Яблоко (1,0л)', unit: 'кор (12 шт)' },
+                { cat: 'Соки Il Primo (0,2л)', name: 'сок Il Primo Ананас (0,2л)', unit: 'уп (8 шт)' },
+                { cat: 'Соки Il Primo (0,2л)', name: 'сок Il Primo Апельсин (0,2л)', unit: 'уп (8 шт)' },
+                { cat: 'Соки Il Primo (0,2л)', name: 'сок Il Primo Вишня (0,2л)', unit: 'уп (8 шт)' },
+                { cat: 'Соки Il Primo (0,2л)', name: 'сок Il Primo Персик (0,2л)', unit: 'уп (8 шт)' },
+                { cat: 'Соки Il Primo (0,2л)', name: 'сок Il Primo Томат (0,2л)', unit: 'уп (8 шт)' },
+                { cat: 'Соки Il Primo (0,2л)', name: 'сок Il Primo Яблоко (0,2л)', unit: 'уп (8 шт)' },
+                { cat: 'Энергетики', name: 'Burn (0,449л)', unit: 'бут' },
+                { cat: 'Энергетики', name: 'Red Bull (0,25л)', unit: 'бут' },
+                { cat: 'Вода (стекло)', name: 'Волжанка б/г стекло (0,5л)', unit: 'уп (12 шт)' },
+                { cat: 'Вода (стекло)', name: 'Волжанка газ стекло (0,5л)', unit: 'уп (12 шт)' }
             ],
             'household': [
                 { cat: 'Расходники бар', name: 'Трубочки черные', unit: 'уп' },
@@ -365,7 +386,6 @@
 
     function selectRestaurantDept(deptName) {
         selectedRestaurantDepartment = deptName;
-        // Теперь имя точки строго совпадает с ключом в базе данных!
         orderData.point = `Ресторан Галерея — ${deptName}`; 
         
         document.getElementById('display-rest-dept').innerText = `Ресторан "Галерея" — ${deptName}`;
@@ -391,6 +411,7 @@
         }
     }
 
+    // ЛОГИКА РЕНДЕРА СПИСКА С АККОРДЕОНОМ
     function renderList(type) {
         if (orderData.point.includes('Ресторан Галерея')) {
             orderData.category = type === 'products' ? 'Продовольствие' : 'Хоз. группа';
@@ -403,7 +424,6 @@
         const container = document.getElementById('items-container');
         container.innerHTML = '';
         
-        // Теперь программа ищет точечно: либо 'Ресторан Галерея — Бар', либо 'Ресторан Галерея — Кухня'
         const activeList = database[orderData.point]?.[type] || [];
         
         if (activeList.length === 0) {
@@ -412,27 +432,50 @@
             return;
         }
         
-        let currentCat = '';
+        // Группируем элементы по внутренним категориям (item.cat)
+        const groups = {};
         activeList.forEach(item => {
-            if (item.cat !== currentCat) {
-                currentCat = item.cat;
-                const catHeader = document.createElement('div');
-                catHeader.className = 'category-header';
-                catHeader.innerText = currentCat;
-                container.appendChild(catHeader);
+            if (!groups[item.cat]) {
+                groups[item.cat] = [];
             }
-            
-            const savedValue = orderData.items[item.name]?.qty || '';
-            
-            const row = document.createElement('div');
-            row.className = 'item-row';
-            row.innerHTML = `
-                <div class="item-name">${item.name}</div>
-                <div class="item-unit">${item.unit}</div>
-                <input type="number" placeholder="0" min="0" value="${savedValue}" onchange="updateQty('${item.name}', this.value, '${item.unit}')">
-            `;
-            container.appendChild(row);
+            groups[item.cat].push(item);
         });
+        
+        // Генерируем кнопки и скрытые панели для категорий
+        for (const categoryName in groups) {
+            const btn = document.createElement('button');
+            btn.className = 'accordion-btn';
+            btn.innerText = categoryName;
+
+            const panel = document.createElement('div');
+            panel.className = 'accordion-panel';
+
+            groups[categoryName].forEach(item => {
+                const savedValue = orderData.items[item.name]?.qty || '';
+                
+                const row = document.createElement('div');
+                row.className = 'item-row';
+                row.innerHTML = `
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-unit">${item.unit}</div>
+                    <input type="number" placeholder="0" min="0" value="${savedValue}" onchange="updateQty('${item.name}', this.value, '${item.unit}')">
+                `;
+                panel.appendChild(row);
+            });
+
+            // Логика клика по кнопке категории
+            btn.addEventListener('click', function() {
+                this.classList.toggle('active');
+                if (panel.style.maxHeight) {
+                    panel.style.maxHeight = null;
+                } else {
+                    panel.style.maxHeight = panel.scrollHeight + "px";
+                }
+            });
+
+            container.appendChild(btn);
+            container.appendChild(panel);
+        }
         changeStep(3);
     }
 
