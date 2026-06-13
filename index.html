@@ -174,7 +174,7 @@
 <script>
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwy70e7boi-9r4rHyPQnsii1Vh6zVhYxrOwjKUGdK3Jh-cTbffXUJOlnzmmPs9tJWVx/exec';
 
-    // ПОЛНАЯ БАЗА ДАННЫХ
+    // ПОЛНАЯ БАЗА ДАННЫХ С ПРИВЯЗКОЙ К ГЛОБАЛЬНЫМ КАТЕГОРИЯМ (ДЛЯ ТРЁХУРОВНЕВОЙ СТРУКТУРЫ)
     const database = {
         'Ресторан Галерея — Бар': {
             'products': [
@@ -316,7 +316,6 @@
         },
         'Лобби-бар': {
             'products': [
-                // ИДЕАЛЬНАЯ ГРУППИРОВКА: ЧАЙ И КОФЕ
                 { global: 'Чай и кофе', cat: 'Кофе, чай, авторский чай', name: 'Кофе зерновой 1 уп. (1кг)', unit: 'шт' },
                 { global: 'Чай и кофе', cat: 'Кофе, чай, авторский чай', name: 'Чай черный листовой Rioba 1уп.(400гр)', unit: 'шт' },
                 { global: 'Чай и кофе', cat: 'Кофе, чай, авторский чай', name: 'Чай черный с бергамотом Rioba 1уп.(400гр)', unit: 'шт' },
@@ -324,42 +323,39 @@
                 { global: 'Чай и кофе', cat: 'Кофе, чай, авторский чай', name: 'Чай зеленый с жасмином Rioba 1уп.(400гр)', unit: 'шт' },
                 { global: 'Чай и кофе', cat: 'Кофе, чай, авторский чай', name: 'Чай зеленый листовой Rioba 1уп.(400гр)', unit: 'шт' },
                 { global: 'Чай и кофе', cat: 'Кофе, чай, авторский чай', name: 'Чай гречишный 1уп.(400гр)', unit: 'шт' },
-                { global: 'Чай и кофе', cat: 'Кофе, чай, авторский чай', name: 'Чай ромашковый 1уп.(400гр)', unit: 'шт' },
+                { global: 'Чай и кофе', cat: 'Кофе, чай, авторский чай', name: 'Чай ромашковый  1уп.(400гр)', unit: 'шт' },
                 { global: 'Чай и кофе', cat: 'Кофе, чай, авторский чай', name: 'Авторский чай Апельсин с облепихой 1кор.(30шт)', unit: 'кор' },
                 { global: 'Чай и кофе', cat: 'Кофе, чай, авторский чай', name: 'Авторский чай Глинтвейн вишневый 1кор.(30шт)', unit: 'кор' },
-                { global: 'Чай и кофе', cat: 'Кофе, чай, авторский чай', name: 'Авторский чай Черная смородина с мелиссой 1кор.(30шт)', unit: 'кор' },
-                { global: 'Чай и кофе', cat: 'Кофе, чай, авторский чай', name: 'Авторский чай Северный манго, маракуйя, апельсин 1кор.(30шт)', unit: 'кор' },
+                { global: 'Чай и кофе', cat: 'Кофе, чай, авторский чай', name: 'Авторский чай Черная смородина с мелисой 1кор.(30шт)', unit: 'кор' },
+                { global: 'Чай и кофе', cat: 'Кофе, чай, авторский чай', name: 'Авторский чай Северный манго, маракуйа, апельсин 1кор.(30шт)', unit: 'кор' },
                 
-                // ИДЕАЛЬНАЯ ГРУППИРОВКА: СЛАДКОЕ (Исправлена привязка категорий у тортов)
                 { global: 'Сладкое', cat: 'Торты и десерты', name: 'Торт Красный бархат 1кор. (12шт)', unit: 'кор' },
                 { global: 'Сладкое', cat: 'Торты и десерты', name: 'Торт Молочная девочка 1кор. (12шт)', unit: 'кор' },
                 { global: 'Сладкое', cat: 'Торты и десерты', name: 'Торт Морковный 1кор. (12шт)', unit: 'кор' },
                 { global: 'Сладкое', cat: 'Торты и десерты', name: 'Торт Черный лес 1кор. (12шт)', unit: 'кор' },
                 { global: 'Сладкое', cat: 'Торты и десерты', name: 'Торт шоколадно-ореховый 1кор. (12шт)', unit: 'кор' },
-                { global: 'Сладкое', cat: 'Торты и десерты', name: 'Чизкейк Нью-Йорк 1кор. (12шт)', unit: 'кор' },
-                { global: 'Сладкое', cat: 'Торты и десерты', name: 'Чизкейк шоколадный 1кор. (12шт)', unit: 'кор' },
+                 { global: 'Сладкое', cat: 'Торты и десерты', name: 'Торт Медовик 1кор. (12шт)', unit: 'кор' },
+                { global: 'Сладкое', cat: 'Торты и десерты', name: 'Чезкейк Нью-Йорк 1кор. (12шт)', unit: 'кор' },
+                { global: 'Сладкое', cat: 'Торты и десерты', name: 'Чезкейк шоколадный 1кор. (12шт)', unit: 'кор' },
                 { global: 'Сладкое', cat: 'Торты и десерты', name: 'Донаты с темной глазурью замороженные RIOBA 1кор. (12шт)', unit: 'кор' },
                 { global: 'Сладкое', cat: 'Торты и десерты', name: 'Донаты с глазурью и ванильным кремом RIOBA 1кор. (12шт)', unit: 'кор' },
-                { global: 'Сладкое', cat: 'Мороженое и топпинги', name: 'Мороженое ванильное 1уп. (2,5кг)', unit: 'уп' },
-                { global: 'Сладкое', cat: 'Мороженое и топпинги', name: 'Топпинг клубника 1бут.', unit: 'бут' },
-                { global: 'Сладкое', cat: 'Мороженое и топпинги', name: 'Топпинг шоколад 1бут.', unit: 'бут' },
-                { global: 'Сладкое', cat: 'Мороженое и топпинги', name: 'Топпинг карамель 1бут.', unit: 'бут' },
+                { global: 'Сладкое', cat: 'Мороженное и топинги', name: 'Мороженное ванильное 1уп. (2,5кг)', unit: 'уп' },
+                { global: 'Сладкое', cat: 'Мороженное и топинги', name: 'Топинг клубника 1бут.', unit: 'бут' },
+                { global: 'Сладкое', cat: 'Мороженное и топинги', name: 'Топинг шоколад 1бут.', unit: 'бут' },
+                { global: 'Сладкое', cat: 'Мороженное и топинги', name: 'Топинг карамель 1бут.', unit: 'бут' },
                 
-                // ИДЕАЛЬНАЯ ГРУППИРОВКА: ФРУКТЫ И ОВОЩИ
                 { global: 'Фрукты и овощи', cat: 'Фрукты и овощи', name: 'Апельсины', unit: 'кг' },
                 { global: 'Фрукты и овощи', cat: 'Фрукты и овощи', name: 'Яблоко зеленое', unit: 'кг' },
                 { global: 'Фрукты и овощи', cat: 'Фрукты и овощи', name: 'Грейпфрут', unit: 'кг' },
                 { global: 'Фрукты и овощи', cat: 'Фрукты и овощи', name: 'Лимоны', unit: 'кг' },
                 { global: 'Фрукты и овощи', cat: 'Фрукты и овощи', name: 'Морковь мытая', unit: 'кг' },
                 
-                // ИДЕАЛЬНАЯ ГРУППИРОВКА: ВИНА
                 { global: 'Вина', cat: 'Вина в маленьких бутылках (187мл)', name: 'Вино Адагум Саперави кр. сух. 0,187мл 1КОР.(12шт)', unit: 'кор' },
                 { global: 'Вина', cat: 'Вина в маленьких бутылках (187мл)', name: 'Вино Шато Тамань Мерло, Анчелотта кр. сух. 0,187мл 1КОР.(12шт)', unit: 'кор' },
                 { global: 'Вина', cat: 'Вина в маленьких бутылках (187мл)', name: 'Вино Шато Тамань Шардоне бел. сух. 0,187мл 1КОР.(12шт)', unit: 'кор' },
                 { global: 'Вина', cat: 'Вина в маленьких бутылках (187мл)', name: 'Вино Шато Тамань Мускат, Пино Гриджио бел. сух. 0,187мл 1КОР.(12шт)', unit: 'кор' },
-                { global: 'Вина', cat: 'Игристые вина', name: 'Вино игристое Лев Голицын 0,2 1КОР.(12шт)', unit: 'кор' },
+                { global: 'Вина', cat: 'Игристые вина', name: 'Вино игристое Лев Голицин 0,2 1КОР.(12шт)', unit: 'кор' },
                 
-                // ИДЕАЛЬНАЯ ГРУППИРОВКА: КРЕПКИЙ АЛКОГОЛЬ
                 { global: 'Крепкий алкоголь', cat: 'Крепкий алкоголь (миниатюры)', name: 'Водка Архангельская 0,1мл 1КОР.(20шт)', unit: 'кор' },
                 { global: 'Крепкий алкоголь', cat: 'Крепкий алкоголь (миниатюры)', name: 'Водка Зеленая марка кедровая 0,1мл 1КОР.(20шт)', unit: 'кор' },
                 { global: 'Крепкий алкоголь', cat: 'Крепкий алкоголь (миниатюры)', name: 'Водка Талка 0,1мл 1КОР.(20шт)', unit: 'кор' },
@@ -369,17 +365,15 @@
                 { global: 'Крепкий алкоголь', cat: 'Крепкий алкоголь (миниатюры)', name: 'Коньяк Киновский 3 года 0,1мл 1КОР.(12шт)', unit: 'кор' },
                 { global: 'Крепкий алкоголь', cat: 'Крепкий алкоголь (миниатюры)', name: 'Коньяк Баррель 0,1мл 1КОР.(12шт)', unit: 'кор' },
                 { global: 'Крепкий алкоголь', cat: 'Крепкий алкоголь (миниатюры)', name: 'Старый Кёнигсберг 4 года 0,1мл 1КОР.(12шт)', unit: 'кор' },
-                { global: 'Крепкий алкоголь', cat: 'Ром Кастро 0,1мл 1КОР.(12шт)', unit: 'кор' },
+                { global: 'Крепкий алкоголь', cat: 'Крепкий алкоголь (миниатюры)', name: 'Ром Кастро 0,1мл 1КОР.(12шт)', unit: 'кор' },
                 
-                // ИДЕАЛЬНАЯ ГРУППИРОВКА: ПИВО
-                { global: 'Пиво и пивные напитки', cat: 'Пиво в бутылках', name: 'Пиво ХАРБИН 0,330мл ', unit: 'уп' },
-                { global: 'Пиво и пивные напитки', cat: 'Пиво в бутылках', name: 'Пиво КОРОНА 0,330мл', unit: 'уп' },
+                { global: 'Пиво и пивные напитки', name: 'Пиво ХАРБИН 0,330мл ', unit: 'уп' },
+                { global: 'Пиво и пивные напитки', name: 'Пиво КОРОНА 0,330мл', unit: 'уп' },
                 
-                // ИДЕАЛЬНАЯ ГРУППИРОВКА: БЕЗАЛКОГОЛЬНЫЕ НАПИТКИ (Убран транслит соков, исправлена орфография)
-                { global: 'Безалкагольные напитки', cat: 'Молоко', name: 'Молоко ультрапаст. 3.2% 1кор.(12шт)', unit: 'кор' },
-                { global: 'Безалкагольные напитки', cat: 'Лимонады и Соки', name: 'Вода ВОЛЖАНКА газ. стекло 0,5 1уп. (15бут)', unit: 'уп' },
-                { global: 'Безалкагольные напитки', cat: 'Лимонады и Соки', name: 'Вода ВОЛЖАНКА негаз. стекло 0,5 1уп. (15бут)', unit: 'уп' },
-                { global: 'Безалкагольные напитки', cat: 'Лимонады и Соки', name: 'Сок IL PRIMO вишня 0,2 1уп. (8шт)', unit: 'уп' },
+                { global: 'Безалкагольные напитки', name: 'Молоко ультрапаст. 3.2% 1кор.(12шт)', unit: 'кор' },
+                { global: 'Безалкагольные напитки', name: 'Вода ВОЛЖАНКА газ. стекло 0,5 1уп. (15бут)', unit: 'уп' },
+                { global: 'Безалкагольные напитки', name: 'Вода ВОЛЖАНКА негаз. стекло 0,5 1уп. (15бут)', unit: 'уп' },
+                                { global: 'Безалкагольные напитки', cat: 'Лимонады и Соки', name: 'Сок IL PRIMO вишня 0,2 1уп. (8шт)', unit: 'уп' },
                 { global: 'Безалкагольные напитки', cat: 'Лимонады и Соки', name: 'Сок IL PRIMO яблоко 0,2 1уп. (8шт)', unit: 'уп' },
                 { global: 'Безалкагольные напитки', cat: 'Лимонады и Соки', name: 'Сок IL PRIMO ананас 0,2 1уп. (8шт)', unit: 'уп' },
                 { global: 'Безалкагольные напитки', cat: 'Лимонады и Соки', name: 'Сок IL PRIMO апельсин 0,2 1уп. (8шт)', unit: 'уп' },
@@ -395,239 +389,292 @@
             'household': [
                 { cat: 'Расходники', name: 'Трубочки крафт', unit: 'уп' }
             ]
+        },
+        'Pool-бар': {
+            'products': [
+                { global: 'Напитки', cat: 'Напитки', name: 'Свежая мята', unit: 'кг' },
+                { global: 'Лёд', cat: 'Лёд', name: 'Лёд краш', unit: 'кг' }
+            ],
+            'household': [
+                { cat: 'Посуда', name: 'Стаканы пластик 0.5', unit: 'уп' }
+            ]
+        },
+        'Кафе Чайка': {
+            'products': [
+                { global: 'Выпечка', cat: 'Выпечка', name: 'Мука высший сорт', unit: 'кг' },
+                { global: 'Кондитерка', cat: 'Кондитерка', name: 'Сахарная пудра', unit: 'кг' }
+            ],
+            'household': [
+                { cat: 'Упаковка', name: 'Контейнер навынос', unit: 'шт' }
+            ]
         }
     };
 
-    // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ СОСТОЯНИЯ
-    let currentPoint = '';
-    let currentGroup = ''; 
-    let isRestaurantMode = false;
-    let selectedRestaurantDept = ''; 
+    let orderData = { point: '', category: '', items: {} };
+    let selectedRestaurantDepartment = '';
 
-    function changeStep(stepNum) {
-        document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
-        document.getElementById(`step${stepNum}`).classList.add('active');
+    function changeStep(stepIdOrNumber) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        if (typeof stepIdOrNumber === 'number') {
+            document.getElementById(`step${stepIdOrNumber}`).classList.add('active');
+        } else {
+            document.getElementById(stepIdOrNumber).classList.add('active');
+        }
     }
 
-    function openRestaurantMenu() {
-        isRestaurantMode = true;
-        document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
-        document.getElementById('step-rest-dept').add ? document.getElementById('step-rest-dept').add('active') : document.getElementById('step-rest-dept').classList.add('active');
+    function openRestaurantMenu() { changeStep('step-rest-dept'); }
+
+    function selectRestaurantDept(deptName) {
+        selectedRestaurantDepartment = deptName;
+        orderData.point = `Ресторан Галерея — ${deptName}`; 
+        document.getElementById('display-rest-dept').innerText = `Ресторан "Галерея" — ${deptName}`;
+        changeStep('step-rest-group');
     }
 
-    function selectRestaurantDept(dept) {
-        selectedRestaurantDept = dept;
-        currentPoint = `Ресторан Галерея — ${dept}`;
-        document.getElementById('display-rest-dept').innerText = currentPoint;
-        document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
-        document.getElementById('step-rest-group').classList.add('active');
-    }
-
-    function backToRestaurantDept() {
-        document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
-        document.getElementById('step-rest-dept').classList.add('active');
-    }
+    function backToRestaurantDept() { changeStep('step-rest-dept'); }
 
     function selectPoint(pointName) {
-        isRestaurantMode = false;
-        currentPoint = pointName;
-        document.getElementById('display-point').innerText = currentPoint;
+        orderData.point = pointName;
+        document.getElementById('display-point').innerText = 'Точка: ' + pointName;
         changeStep(2);
     }
 
+    function updateQty(itemName, qtyValue, unitType) {
+        const val = parseFloat(qtyValue);
+        if (val > 0) {
+            orderData.items[itemName] = { qty: val, unit: unitType };
+        } else {
+            delete orderData.items[itemName];
+        }
+    }
+
+    // ЛОГИКА СЛОЖНОГО ТРЁХУРОВНЕВОГО И ДВУХУРОВНЕВОГО РЕНДЕРА
+        // ЛОГИКА СЛОЖНОГО ТРЁХУРОВНЕВОГО И ДВУХУРОВНЕВОГО РЕНДЕРА
+    function renderList(type) {
+        if (orderData.point.includes('Ресторан Галерея')) {
+            orderData.category = type === 'products' ? 'Продовольствие' : 'Хоз. группа';
+        } else {
+            orderData.category = type === 'products' ? 'Продукты' : 'Хоз. группа';
+        }
+        
+        document.getElementById('display-category').innerText = orderData.category;
+        const container = document.getElementById('items-container');
+        container.innerHTML = '';
+        
+        const activeList = database[orderData.point]?.[type] || [];
+        
+        if (activeList.length === 0) {
+            container.innerHTML = '<div style="padding: 20px; text-align: center; color: #7f8c8d;">Список позиций пуст.</div>';
+            changeStep(3);
+            return;
+        }
+
+        // РЕЖИМ 1: СТАРАЯ ХОЗ. ГРУППА (Двухуровневый вид)
+        if (type === 'household') {
+            const groups = {};
+            activeList.forEach(item => {
+                if (!groups[item.cat]) groups[item.cat] = [];
+                groups[item.cat].push(item);
+            });
+            
+            for (const categoryName in groups) {
+                // Если в подкатегории только одна позиция, отображаем ее сразу
+                if (groups[categoryName].length === 1) {
+                    const item = groups[categoryName][0];
+                    const savedValue = orderData.items[item.name]?.qty || '';
+                    const row = document.createElement('div');
+                    row.className = 'item-row';
+                    row.innerHTML = `
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-unit">${item.unit}</div>
+                        <input type="number" placeholder="0" min="0" value="${savedValue}" onchange="updateQty('${item.name}', this.value, '${item.unit}')">
+                    `;
+                    container.appendChild(row);
+                } else {
+                    // Иначе используем стандартный аккордеон
+                    const btn = document.createElement('button');
+                    btn.className = 'accordion-btn';
+                    btn.innerText = categoryName;
+
+                    const panel = document.createElement('div');
+                    panel.className = 'accordion-panel';
+
+                    groups[categoryName].forEach(item => {
+                        const savedValue = orderData.items[item.name]?.qty || '';
+                        const row = document.createElement('div');
+                        row.className = 'item-row';
+                        row.innerHTML = `
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-unit">${item.unit}</div>
+                            <input type="number" placeholder="0" min="0" value="${savedValue}" onchange="updateQty('${item.name}', this.value, '${item.unit}')">
+                        `;
+                        panel.appendChild(row);
+                    });
+
+                    btn.addEventListener('click', function() {
+                        this.classList.toggle('active');
+                        panel.style.maxHeight = panel.style.maxHeight ? null : panel.scrollHeight + "px";
+                    });
+
+                    container.appendChild(btn);
+                    container.appendChild(panel);
+                }
+            }
+            changeStep(3);
+            return;
+        }
+
+        // РЕЖИМ 2: ПРОДУКТЫ / ПРОДОВОЛЬСТВИЕ (Новый трёхуровневый аккордеон)
+        // Строим дерево: Глобальная категория -> Подкатегория -> Список товаров
+        const tree = {};
+        activeList.forEach(item => {
+            const g = item.global || 'Прочее';
+            const c = item.cat || 'Общее';
+            if (!tree[g]) tree[g] = {};
+            if (!tree[g][c]) tree[g][c] = [];
+            tree[g][c].push(item);
+        });
+
+        // Строим HTML структуру динамически
+        for (const globalName in tree) {
+            // Кнопка 1-го уровня
+            const gBtn = document.createElement('button');
+            gBtn.className = 'global-btn';
+            gBtn.innerText = globalName;
+
+            // Панель 1-го уровня
+            const gPanel = document.createElement('div');
+            gPanel.className = 'global-panel';
+
+            for (const subName in tree[globalName]) {
+                // Проверяем, если в подкатегории только одна позиция И это не "Игристые вина"
+                if (tree[globalName][subName].length === 1 && subName !== 'Игристые вина') {
+                    const item = tree[globalName][subName][0];
+                    const savedValue = orderData.items[item.name]?.qty || '';
+                    const row = document.createElement('div');
+                    row.className = 'item-row';
+                    row.innerHTML = `
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-unit">${item.unit}</div>
+                        <input type="number" placeholder="0" min="0" value="${savedValue}" onchange="updateQty('${item.name}', this.value, '${item.unit}')">
+                    `;
+                    gPanel.appendChild(row); // Добавляем сразу в глобальную панель
+                } else {
+                    // Иначе создаем кнопку и панель 2-го уровня
+                    const subBtn = document.createElement('button');
+                    subBtn.className = 'sub-btn';
+                    subBtn.innerText = subName;
+
+                    const subPanel = document.createElement('div');
+                    subPanel.className = 'sub-panel';
+
+                    // Наполнение товарами (3 уровень)
+                    tree[globalName][subName].forEach(item => {
+                        const savedValue = orderData.items[item.name]?.qty || '';
+                        const row = document.createElement('div');
+                        row.className = 'item-row';
+                        row.innerHTML = `
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-unit">${item.unit}</div>
+                            <input type="number" placeholder="0" min="0" value="${savedValue}" onchange="updateQty('${item.name}', this.value, '${item.unit}')">
+                        `;
+                        subPanel.appendChild(row);
+                    });
+
+                    // Логика клика на 2-й уровень
+                    subBtn.addEventListener('click', function(e) {
+                        e.stopPropagation(); // чтобы не триггерить родительскую панель
+                        this.classList.toggle('active');
+                        
+                        if (subPanel.style.maxHeight) {
+                            subPanel.style.maxHeight = null;
+                        } else {
+                            subPanel.style.maxHeight = subPanel.scrollHeight + "px";
+                            // Корректируем высоту родительской панели, чтобы она расширилась под новый размер
+                            gPanel.style.maxHeight = (gPanel.scrollHeight + subPanel.scrollHeight) + "px";
+                        }
+                    });
+
+                    gPanel.appendChild(subBtn);
+                    gPanel.appendChild(subPanel);
+                }
+            }
+
+            // Логика клика на 1-й уровень
+            gBtn.addEventListener('click', function() {
+                // Сворачиваем все другие открытые глобальные панели
+                document.querySelectorAll('.global-panel').forEach(panel => {
+                    if (panel !== gPanel && panel.style.maxHeight) {
+                        panel.style.maxHeight = null;
+                        panel.previousElementSibling.classList.remove('active');
+                        // Также сворачиваем все под-панели внутри свернутой глобальной панели
+                        panel.querySelectorAll('.sub-panel').forEach(subPanel => {
+                            subPanel.style.maxHeight = null;
+                            subPanel.previousElementSibling.classList.remove('active');
+                        });
+                    }
+                });
+
+                this.classList.toggle('active');
+                if (gPanel.style.maxHeight) {
+                    gPanel.style.maxHeight = null;
+                } else {
+                    gPanel.style.maxHeight = gPanel.scrollHeight + "px";
+                }
+            });
+
+            container.appendChild(gBtn);
+            container.appendChild(gPanel);
+        }
+        changeStep(3);
+    }
+
     function handleBackFromItems() {
-        if (isRestaurantMode) {
-            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
-            document.getElementById('step-rest-group').classList.add('active');
+        if (orderData.point.includes('Ресторан Галерея')) {
+            changeStep('step-rest-group');
         } else {
             changeStep(2);
         }
     }
 
-    function renderList(groupType) {
-        currentGroup = groupType;
-        const container = document.getElementById('items-container');
-        container.innerHTML = '';
-        
-        const headingText = currentGroup === 'products' ? 'Продукты / Продовольствие' : 'Хоз. группа';
-        document.getElementById('display-category').innerText = `${currentPoint} — ${headingText}`;
-
-        const items = database[currentPoint]?.[currentGroup] || [];
-
-        if (groupType === 'products') {
-            // ТРЁХУРОВНЕВАЯ СТРУКТУРА (АККОРДЕОН В АККОРДЕОНЕ)
-            const structure = {};
-            items.forEach(item => {
-                if (!structure[item.global]) structure[item.global] = {};
-                if (!structure[item.global][item.cat]) structure[item.global][item.cat] = [];
-                structure[item.global][item.cat].push(item);
-            });
-
-            for (const globalName in structure) {
-                const gBtn = document.createElement('button');
-                gBtn.className = 'global-btn';
-                gBtn.innerText = globalName;
-                
-                const gPanel = document.createElement('div');
-                gPanel.className = 'global-panel';
-
-                for (const subName in structure[globalName]) {
-                    const sBtn = document.createElement('button');
-                    sBtn.className = 'sub-btn';
-                    sBtn.innerText = subName;
-                    
-                    const sPanel = document.createElement('div');
-                    sPanel.className = 'sub-panel';
-
-                    structure[globalName][subName].forEach(item => {
-                        const row = document.createElement('div');
-                        row.className = 'item-row';
-                        row.innerHTML = `
-                            <div class="item-name">${item.name}</div>
-                            <div><span class="item-unit">${item.unit}</span></div>
-                            <div><input type="number" min="0" placeholder="0" data-name="${item.name}" data-unit="${item.unit}" data-global="${item.global}" data-cat="${item.cat}"></div>
-                        `;
-                        sPanel.appendChild(row);
-                    });
-
-                    sBtn.onclick = function() {
-                        this.classList.toggle('active');
-                        if (sPanel.style.maxHeight) {
-                            sPanel.style.maxHeight = null;
-                        } else {
-                            sPanel.style.maxHeight = sPanel.scrollHeight + "px";
-                            gPanel.style.maxHeight = (gPanel.scrollHeight + sPanel.scrollHeight) + "px";
-                        }
-                    };
-
-                    gPanel.appendChild(sBtn);
-                    gPanel.appendChild(sPanel);
-                }
-
-                gBtn.onclick = function() {
-                    this.classList.toggle('active');
-                    if (gPanel.style.maxHeight) {
-                        gPanel.style.maxHeight = null;
-                    } else {
-                        gPanel.style.maxHeight = gPanel.scrollHeight + "px";
-                    }
-                };
-
-                container.appendChild(gBtn);
-                container.appendChild(gPanel);
-            }
-        } else {
-            // ДВУХУРОВНЕВАЯ СТРУКТУРА ДЛЯ ХОЗ. ТОВАРОВ
-            const structure = {};
-            items.forEach(item => {
-                if (!structure[item.cat]) structure[item.cat] = [];
-                structure[item.cat].push(item);
-            });
-
-            for (const catName in structure) {
-                const btn = document.createElement('button');
-                btn.className = 'accordion-btn';
-                btn.innerText = catName;
-                
-                const panel = document.createElement('div');
-                panel.className = 'accordion-panel';
-
-                structure[catName].forEach(item => {
-                    const row = document.createElement('div');
-                    row.className = 'item-row';
-                    row.innerHTML = `
-                        <div class="item-name">${item.name}</div>
-                        <div><span class="item-unit">${item.unit}</span></div>
-                        <div><input type="number" min="0" placeholder="0" data-name="${item.name}" data-unit="${item.unit}" data-global="Хоз. группа" data-cat="${item.cat}"></div>
-                    `;
-                    panel.appendChild(row);
-                });
-
-                btn.onclick = function() {
-                    this.classList.toggle('active');
-                    if (panel.style.maxHeight) {
-                        panel.style.maxHeight = null;
-                    } else {
-                        panel.style.maxHeight = panel.scrollHeight + "px";
-                    }
-                };
-
-                container.appendChild(btn);
-                container.appendChild(panel);
-            }
-        }
-
-        changeStep(3);
-    }
-
     function showSummary() {
-        const inputs = document.querySelectorAll('#items-container input[type="number"]');
-        let hasData = false;
-        let html = `<p><strong>Точка:</strong> ${currentPoint}</p>`;
-        html += `<p><strong>Тип заявки:</strong> ${currentGroup === 'products' ? 'Продукты' : 'Хоз. товары'}</p><hr>`;
-
-        inputs.forEach(input => {
-            const val = parseInt(input.value);
-            if (val > 0) {
-                hasData = true;
-                html += `<p style="margin: 6px 0; font-size: 14px;">• ${input.dataset.name} — <strong>${val} ${input.dataset.unit}</strong></p>`;
-            }
-        });
-
-        if (!hasData) {
-            alert('Пожалуйста, введите количество хотя бы для одного товара!');
-            return;
+        const summary = document.getElementById('summary-content');
+        const items = Object.entries(orderData.items);
+        
+        if (items.length === 0) { 
+            alert('Вы ничего не выбрали!'); 
+            return; 
         }
-
-        document.getElementById('summary-content').innerHTML = html;
+        
+        let html = `<strong>Точка:</strong> ${orderData.point}<br><strong>Тип:</strong> ${orderData.category}<br><br>`;
+        items.forEach(([name, itemObj]) => { 
+            html += `• ${name}: <strong>${itemObj.qty} ${itemObj.unit}</strong><br>`; 
+        });
+        
+        summary.innerHTML = html;
         changeStep(4);
     }
 
-    function sendOrder() {
-        const sendBtn = document.getElementById('send-btn');
-        sendBtn.disabled = true;
-        sendBtn.innerText = 'Отправка...';
+    async function sendOrder() {
+        const btn = document.getElementById('send-btn');
+        btn.disabled = true;
+        btn.innerText = 'Отправка...';
 
-        const inputs = document.querySelectorAll('#items-container input[type="number"]');
-        const orderItems = [];
-
-        inputs.forEach(input => {
-            const val = parseInt(input.value);
-            if (val > 0) {
-                orderItems.push({
-                    global: input.dataset.global || '',
-                    category: input.dataset.cat || '',
-                    name: input.dataset.name,
-                    quantity: val,
-                    unit: input.dataset.unit
-                });
-            }
-        });
-
-        const payload = {
-            point: currentPoint,
-            group: currentGroup,
-            items: orderItems
-        };
-
-        fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            cache: 'no-cache',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-        .then(() => {
-            alert('Заявка успешно отправлена в торговый отдел!');
+        try {
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                body: JSON.stringify(orderData)
+            });
+            alert('Заказ успешно отправлен!');
             location.reload();
-        })
-        .catch(err => {
-            alert('Ошибка при отправке: ' + err);
-            sendBtn.disabled = false;
-            sendBtn.innerText = 'Отправить в торговый отдел';
-        });
+        } catch (e) {
+            alert('Ошибка при отправке: ' + e);
+            btn.disabled = false;
+            btn.innerText = 'Попробовать еще раз';
+        }
     }
 </script>
-
 </body>
 </html>
