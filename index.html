@@ -6,57 +6,175 @@
     <title>Система Заказов v1.3</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f4f7f6; --white: #ffffff; --text: #2c3e50; --border: #dcdde1; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; padding: 20px; }
-        .app-container { width: 100%; max-width: 600px; background: var(--white); padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        h1 { font-size: 24px; text-align: center; margin-bottom: 30px; color: var(--primary); }
-        h2 { font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+        :root {
+            --primary: #2f302d;
+            --accent: #c28a32;
+            --accent-hover: #a97220;
+            --accent-soft: #fbf4e6;
+            --terracotta: #b96f52;
+            --bg: #f7f5f0;
+            --white: #ffffff;
+            --text: #2f302d;
+            --muted: #77766f;
+            --border: #e7e1d6;
+            --border-strong: #d9d0c1;
+            --surface-soft: #faf9f6;
+            --surface-warm: #f5efe4;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--white);
+            padding: 30px;
+            border: 1px solid rgba(217, 208, 193, 0.75);
+            border-radius: 16px;
+            box-shadow: 0 14px 35px rgba(47, 48, 45, 0.07);
+        }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin: 0 0 30px;
+            color: var(--primary);
+            letter-spacing: -0.4px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin: 0 0 15px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--surface-warm);
+            padding-bottom: 11px;
+            letter-spacing: -0.2px;
+        }
+
         .step { display: none; }
         .step.active { display: block; }
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        button { padding: 15px; border: 1px solid var(--border); background: var(--white); border-radius: 8px; cursor: pointer; font-size: 16px; transition: all 0.2s; width: 100%; font-weight: 600; color: var(--primary); }
-        button:hover { border-color: var(--accent); color: var(--accent); }
-        button.primary { background: var(--accent); color: white; border: none; width: 100%; margin-top: 20px; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 13px;
+        }
+
+        button {
+            padding: 15px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            border-radius: 11px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            width: 100%;
+            font-weight: 600;
+            color: var(--primary);
+            box-shadow: 0 2px 6px rgba(47, 48, 45, 0.035);
+        }
+
+        button:hover {
+            border-color: var(--accent);
+            color: var(--accent-hover);
+            background: var(--accent-soft);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 12px rgba(47, 48, 45, 0.07);
+        }
+
+        button:active { transform: translateY(0); }
+
+        button.primary {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 6px 15px rgba(194, 138, 50, 0.22);
+        }
+
+        button.primary:hover {
+            background: var(--accent-hover);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        button:disabled {
+            background: #d8d4cc;
+            color: #8b887f;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
         /* СТИЛИ ДЛЯ ТРЕХУРОВНЕВОГО АККОРДЕОНА */
-        /* 1 уровень: Глобальные вкладки */
         .global-btn {
-            background-color: #e2e8f0;
-            color: #1a202c;
+            background-color: var(--surface-warm);
+            color: var(--primary);
             cursor: pointer;
             padding: 16px;
             width: 100%;
             text-align: left;
-            border: 1px solid #cbd5e0;
+            border: 1px solid var(--border-strong);
             outline: none;
             font-size: 15px;
             font-weight: 700;
-            border-radius: 8px;
+            border-radius: 11px;
             margin-top: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: none;
         }
-        .global-btn:hover { background-color: #cbd5e0; }
-        .global-btn.active { border-bottom-left-radius: 0; border-bottom-right-radius: 0; background-color: #cbd5e0; }
-        .global-btn::after { content: '\25BC'; font-size: 11px; color: #4a5568; transition: transform 0.2s; }
+
+        .global-btn:hover {
+            background-color: var(--accent-soft);
+            border-color: #d8bd8b;
+            color: var(--primary);
+        }
+
+        .global-btn.active {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            background-color: var(--accent-soft);
+            border-color: #d8bd8b;
+            color: var(--primary);
+        }
+
+        .global-btn::after {
+            content: '\25BC';
+            font-size: 11px;
+            color: var(--accent);
+            transition: transform 0.2s;
+        }
+
         .global-btn.active::after { transform: rotate(180deg); }
-        
+
         .global-panel {
-            background-color: #f7fafc;
+            background-color: #fffdfa;
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.25s ease-out;
-            border: 1px solid #cbd5e0;
+            border: 1px solid #d8bd8b;
             border-top: none;
-            border-radius: 0 0 8px 8px;
+            border-radius: 0 0 11px 11px;
             padding: 0 10px;
         }
 
         /* 2 уровень: Внутренние подкатегории */
         .sub-btn {
-            background-color: #ffffff;
+            background-color: var(--white);
             color: var(--primary);
             cursor: pointer;
             padding: 12px 14px;
@@ -66,15 +184,37 @@
             outline: none;
             font-size: 13px;
             font-weight: 600;
-            border-radius: 6px;
+            border-radius: 9px;
             margin: 8px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: none;
         }
-        .sub-btn:hover { background-color: #edf2f7; }
-        .sub-btn.active { border-bottom-left-radius: 0; border-bottom-right-radius: 0; background-color: #edf2f7; margin-bottom: 0; }
-        .sub-btn::after { content: '\25BC'; font-size: 9px; color: #a0aec0; transition: transform 0.2s; }
+
+        .sub-btn:hover {
+            background-color: var(--surface-soft);
+            border-color: var(--border-strong);
+            color: var(--primary);
+            transform: none;
+            box-shadow: none;
+        }
+
+        .sub-btn.active {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            background-color: var(--surface-soft);
+            margin-bottom: 0;
+            border-color: var(--border-strong);
+        }
+
+        .sub-btn::after {
+            content: '\25BC';
+            font-size: 9px;
+            color: var(--accent);
+            transition: transform 0.2s;
+        }
+
         .sub-btn.active::after { transform: rotate(180deg); }
 
         .sub-panel {
@@ -82,34 +222,134 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.25s ease-out;
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-strong);
             border-top: none;
-            border-radius: 0 0 6px 6px;
+            border-radius: 0 0 9px 9px;
             padding: 0 10px;
             margin-bottom: 8px;
         }
 
         /* 3 уровень: Строки товаров */
-        .item-row { display: grid; grid-template-columns: 2fr 1fr 1fr; align-items: center; padding: 10px 5px; border-bottom: 1px solid #edf2f7; }
+        .item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            align-items: center;
+            padding: 10px 5px;
+            border-bottom: 1px solid #eee9df;
+            gap: 8px;
+        }
+
         .item-row:last-child { border-bottom: none; }
-        .item-name { font-weight: 500; font-size: 13px; color: #2d3748; }
-        .item-unit { color: #7f8c8d; font-size: 11px; text-align: center; background: #edf2f7; padding: 4px 6px; border-radius: 4px; font-weight: 600; }
-        input[type="number"] { width: 75px; padding: 6px; border: 1px solid var(--border); border-radius: 4px; text-align: center; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13px; }
-        
+
+        .item-name {
+            font-weight: 500;
+            font-size: 13px;
+            color: #454640;
+        }
+
+        .item-unit {
+            color: #7b786f;
+            font-size: 11px;
+            text-align: center;
+            background: #f3efe7;
+            padding: 4px 6px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+
+        input[type="number"] {
+            width: 75px;
+            padding: 7px;
+            border: 1px solid var(--border-strong);
+            border-radius: 7px;
+            text-align: center;
+            background: #fff;
+            color: var(--primary);
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(194, 138, 50, 0.13);
+        }
+
         /* Стили для старого плоского аккордеона (используется в Хоз. группе) */
         .accordion-btn {
-            background-color: #f8f9fa; color: var(--primary); cursor: pointer; padding: 14px 16px; width: 100%; text-align: left; border: 1px solid var(--border); outline: none; font-size: 14px; font-weight: 700; transition: all 0.2s; border-radius: 6px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--surface-soft);
+            color: var(--primary);
+            cursor: pointer;
+            padding: 14px 16px;
+            width: 100%;
+            text-align: left;
+            border: 1px solid var(--border);
+            outline: none;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            border-radius: 9px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: none;
         }
-        .accordion-btn:hover { background-color: #edf2f7; border-color: #b8bfc6; }
-        .accordion-btn.active { background-color: #edf2f7; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-        .accordion-btn::after { content: '\25BC'; font-size: 10px; color: #7f8c8d; transition: transform 0.2s; }
-        .accordion-btn.active::after { transform: rotate(180deg); }
-        .accordion-panel { background-color: var(--white); max-height: 0; overflow: hidden; transition: max-height 0.25s ease-out; border: 1px solid var(--border); border-top: none; border-radius: 0 0 6px 6px; padding: 0 10px; }
 
-        .summary { margin-top: 20px; padding: 15px; background: #fdfdfd; border: 1px dashed var(--border); }
+        .accordion-btn:hover {
+            background-color: var(--accent-soft);
+            border-color: #d8bd8b;
+            color: var(--primary);
+            transform: none;
+            box-shadow: none;
+        }
+
+        .accordion-btn.active {
+            background-color: var(--accent-soft);
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .accordion-btn::after {
+            content: '\25BC';
+            font-size: 10px;
+            color: var(--accent);
+            transition: transform 0.2s;
+        }
+
+        .accordion-btn.active::after { transform: rotate(180deg); }
+
+        .accordion-panel {
+            background-color: var(--white);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.25s ease-out;
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 9px 9px;
+            padding: 0 10px;
+        }
+
+        .summary {
+            margin-top: 20px;
+            padding: 16px;
+            background: #fffdfa;
+            color: var(--primary);
+            border: 1px dashed var(--border-strong);
+            border-radius: 10px;
+        }
+
         .btn-full { grid-column: span 2; margin-top: 10px; }
-    </style>
-    <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/restaurant.png">
+
+        @media (max-width: 480px) {
+            body { padding: 12px; }
+            .app-container { padding: 22px 18px; border-radius: 14px; }
+            .btn-grid { gap: 10px; }
+            button { padding: 14px 10px; }
+        }
+    </style>    <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/restaurant.png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/restaurant.png">
 </head>
 <body>
