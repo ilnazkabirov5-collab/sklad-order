@@ -760,6 +760,34 @@
         }
     }
 
+
+
+    // Создаём строку безопасно: название товара не вставляется в HTML-обработчик.
+    function createItemRow(item, savedValue = '') {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+
+        const name = document.createElement('div');
+        name.className = 'item-name';
+        name.textContent = item.name;
+
+        const unit = document.createElement('div');
+        unit.className = 'item-unit';
+        unit.textContent = item.unit;
+
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.placeholder = '0';
+        input.min = '0';
+        input.value = savedValue;
+        input.addEventListener('change', function () {
+            updateQty(item.name, this.value, item.unit);
+        });
+
+        row.append(name, unit, input);
+        return row;
+    }
+
     // ЛОГИКА СЛОЖНОГО ТРЁХУРОВНЕВОГО И ДВУХУРОВНЕВОГО РЕНДЕРА
         // ЛОГИКА СЛОЖНОГО ТРЁХУРОВНЕВОГО И ДВУХУРОВНЕВОГО РЕНДЕРА
     function renderList(type) {
@@ -794,13 +822,7 @@
                 if (groups[categoryName].length === 1) {
                     const item = groups[categoryName][0];
                     const savedValue = orderData.items[item.name]?.qty || '';
-                    const row = document.createElement('div');
-                    row.className = 'item-row';
-                    row.innerHTML = `
-                        <div class="item-name">${item.name}</div>
-                        <div class="item-unit">${item.unit}</div>
-                        <input type="number" placeholder="0" min="0" value="${savedValue}" onchange="updateQty('${item.name}', this.value, '${item.unit}')">
-                    `;
+                    const row = createItemRow(item, savedValue);
                     container.appendChild(row);
                 } else {
                     // Иначе используем стандартный аккордеон
@@ -813,13 +835,7 @@
 
                     groups[categoryName].forEach(item => {
                         const savedValue = orderData.items[item.name]?.qty || '';
-                        const row = document.createElement('div');
-                        row.className = 'item-row';
-                        row.innerHTML = `
-                            <div class="item-name">${item.name}</div>
-                            <div class="item-unit">${item.unit}</div>
-                            <input type="number" placeholder="0" min="0" value="${savedValue}" onchange="updateQty('${item.name}', this.value, '${item.unit}')">
-                        `;
+                        const row = createItemRow(item, savedValue);
                         panel.appendChild(row);
                     });
 
@@ -863,13 +879,7 @@
                 if (tree[globalName][subName].length === 1 && subName !== 'Игристые вина') {
                     const item = tree[globalName][subName][0];
                     const savedValue = orderData.items[item.name]?.qty || '';
-                    const row = document.createElement('div');
-                    row.className = 'item-row';
-                    row.innerHTML = `
-                        <div class="item-name">${item.name}</div>
-                        <div class="item-unit">${item.unit}</div>
-                        <input type="number" placeholder="0" min="0" value="${savedValue}" onchange="updateQty('${item.name}', this.value, '${item.unit}')">
-                    `;
+                    const row = createItemRow(item, savedValue);
                     gPanel.appendChild(row); // Добавляем сразу в глобальную панель
                 } else {
                     // Иначе создаем кнопку и панель 2-го уровня
@@ -883,13 +893,7 @@
                     // Наполнение товарами (3 уровень)
                     tree[globalName][subName].forEach(item => {
                         const savedValue = orderData.items[item.name]?.qty || '';
-                        const row = document.createElement('div');
-                        row.className = 'item-row';
-                        row.innerHTML = `
-                            <div class="item-name">${item.name}</div>
-                            <div class="item-unit">${item.unit}</div>
-                            <input type="number" placeholder="0" min="0" value="${savedValue}" onchange="updateQty('${item.name}', this.value, '${item.unit}')">
-                        `;
+                        const row = createItemRow(item, savedValue);
                         subPanel.appendChild(row);
                     });
 
